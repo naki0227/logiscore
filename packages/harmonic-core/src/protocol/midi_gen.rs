@@ -409,8 +409,9 @@ pub fn decode_project_from_midi(midi_bytes: &[u8]) -> Result<Vec<(String, Header
                 if let Ok(text) = std::str::from_utf8(text_bytes) {
                     current_meta_texts.push(text.to_string());
                     // 最初のヘッダーをグローバル設定として記録
-                    if global_header.is_none() && text.starts_with("LOGISCORE:") {
-                        if let Ok((h, _)) = Header::from_meta_strings(&current_meta_texts, None) {
+                    // フィールドは別々のイベントとして届くため、毎イベントごとにパースを試みる
+                    if global_header.is_none() {
+                        if let Ok(h) = Header::from_global_meta_strings(&current_meta_texts) {
                             global_header = Some(h);
                         }
                     }

@@ -50,6 +50,39 @@ impl Header {
         ]
     }
 
+    /// グローバルヘッダー用（データ長を要求しない）のパース処理
+    pub fn from_global_meta_strings(texts: &[String]) -> Result<Self, LogiscoreError> {
+        let has_magic = texts.iter().any(|t| t.starts_with("LOGISCORE:"));
+        if !has_magic {
+            return Err(LogiscoreError::InvalidMidi("Missing LOGISCORE magic for global header".into()));
+        }
+
+        let magic = texts.iter().find(|t| t.starts_with("LOGISCORE:")).unwrap();
+        if !magic.starts_with("LOGISCORE:v1") {
+            return Err(LogiscoreError::UnsupportedVersion(magic.clone()));
+        }
+
+        let scale_id = texts
+            .iter()
+            .find(|t| t.starts_with("SCALE:"))
+            .and_then(|t| t[6..].parse::<u8>().ok())
+            .ok_or_else(|| LogiscoreError::InvalidMidi("Missing or invalid SCALE".into()))?;
+
+        let root_key = texts
+            .iter()
+            .find(|t| t.starts_with("ROOT:"))
+            .and_then(|t| t[5..].parse::<u8>().ok())
+            .ok_or_else(|| LogiscoreError::InvalidMidi("Missing or invalid ROOT".into()))?;
+
+        let bytes_per_tick = texts
+            .iter()
+            .find(|t| t.starts_with("BPT:"))
+            .and_then(|t| t[4..].parse::<u8>().ok())
+            .unwrap_or(8);
+
+        Ok(Self { scale_id, root_key, bytes_per_tick })
+    }
+
     /// メタイベント文字列群からパースする。
     ///
     /// # Returns
