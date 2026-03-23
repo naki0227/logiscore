@@ -170,14 +170,25 @@ impl HarmonicByte {
         abs_tick: u64,
     ) -> Result<i8, LogiscoreError> {
         let prog_offset = Self::get_progression_offset(abs_tick);
-        let base = 48 + root_key + prog_offset;
-        let relative = note.checked_sub(base).ok_or(LogiscoreError::NoteNotInScale(note))?;
+        let base = 48u8.saturating_add(root_key).saturating_add(prog_offset);
+        let relative = note.saturating_sub(base);
         
-        let index = scale
-            .iter()
-            .position(|&n| n == relative)
-            .ok_or(LogiscoreError::NoteNotInScale(note))?;
-        Ok((index as i8) - 8)
+        // 完全一致を試みる
+        if let Some(index) = scale.iter().position(|&n| n == relative) {
+            return Ok((index as i8) - 8);
+        }
+        
+        // フォールバック: 最も近い音を探す（堅牢性向上）
+        let mut best_index = 0usize;
+        let mut best_diff = u8::MAX;
+        for (i, &n) in scale.iter().enumerate() {
+            let diff = if relative >= n { relative - n } else { n - relative };
+            if diff < best_diff {
+                best_diff = diff;
+                best_index = i;
+            }
+        }
+        Ok((best_index as i8) - 8)
     }
 
     /// MIDI Velocity を算出する (0–127)。
