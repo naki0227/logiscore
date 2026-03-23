@@ -78,6 +78,12 @@ pub fn get_extension_info(extension: &str) -> String {
     .to_string()
 }
 
+/// 現在のプロトコルバージョンを返す
+#[wasm_bindgen]
+pub fn get_version() -> String {
+    "1.4".to_string()
+}
+
 // --- Rust ネイティブ API ---
 
 /// ソースコードを MIDI バイナリにエンコードする。
