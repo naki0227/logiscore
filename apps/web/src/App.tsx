@@ -71,7 +71,7 @@ const EXTENSIONS = [
 ];
 
 function App() {
-  const { ready, processing, midiData, decodedSource, extensionInfo, error, initialize, encodeSource, encodeProjectSource, decodeSource, decodeProjectSource } = useEntropy();
+  const { ready, processing, midiData, decodedSource, extensionInfo, error, systemVersion, initialize, encodeSource, encodeProjectSource, decodeSource, decodeProjectSource } = useEntropy();
   const { playing, progress, activeFile, play, stop } = useAudioEngine();
   const visualizerRef = useRef<VisualizerHandle>(null);
 
@@ -448,7 +448,7 @@ function App() {
             className="logo"
         >
           <span className="logo-text">L O G I S C O R E</span>
-          <span className="logo-version">v1.7</span>
+          <span className="logo-version">v{systemVersion || '1.7'}</span>
         </motion.div>
         <div className="status-bar-container">
             <motion.div 
@@ -527,6 +527,7 @@ function App() {
                                 <div className="project-header" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <span className="project-name">{filename}</span>
                                     <span className="project-count">{projectFiles.length} tracks</span>
+                                    {systemVersion && <span className="project-version" style={{ fontSize: '10px', opacity: 0.5 }}>Protocol v{systemVersion}</span>}
                                     {projectFiles.length > 0 && (
                                         <button className="btn-icon" onClick={handleDownloadZip} title="Download Source ZIP" style={{ marginLeft: 'auto', padding: '4px 8px', fontSize: '11px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)' }}>
                                             <Icons.Download /> ZIP

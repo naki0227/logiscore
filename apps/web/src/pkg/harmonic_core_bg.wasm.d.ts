@@ -6,6 +6,7 @@ export const decode_wasm: (a: number, b: number) => [number, number, number, num
 export const encode_project_wasm: (a: number, b: number) => [number, number, number, number];
 export const encode_wasm: (a: number, b: number, c: number, d: number) => [number, number, number, number];
 export const get_extension_info: (a: number, b: number) => [number, number];
+export const get_version: () => [number, number];
 export const __wbindgen_externrefs: WebAssembly.Table;
 export const __wbindgen_malloc: (a: number, b: number) => number;
 export const __externref_table_dealloc: (a: number) => void;

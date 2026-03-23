@@ -4,6 +4,7 @@ import init, {
   decode_wasm,
   decode_project_wasm,
   get_extension_info,
+  get_version as get_version_wasm,
 } from '../pkg/harmonic_core.js';
 
 let initialized = false;
@@ -55,4 +56,11 @@ export function getExtensionInfo(extension: string): {
  */
 export function decodeProject(midiBytes: Uint8Array): { name: string, source: string, extension: string }[] {
   return JSON.parse(decode_project_wasm(midiBytes));
+}
+
+/**
+ * 現在のプロトコルバージョンを取得する。
+ */
+export function getVersion(): string {
+  return get_version_wasm();
 }

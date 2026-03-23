@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
-import { initWasm, encode, decode, encodeProject, decodeProject, getExtensionInfo } from '../lib/wasm-loader';
+import { initWasm, encode, decode, encodeProject, decodeProject, getExtensionInfo, getVersion } from '../lib/wasm-loader';
 
 export interface EntropyState {
   /** WASM 初期化済みか */
@@ -14,6 +14,8 @@ export interface EntropyState {
   extensionInfo: { scale_id: number; root_key: number; name: string; scale_name: string } | null;
   /** エラーメッセージ */
   error: string | null;
+  /** プロトコルバージョン */
+  systemVersion: string | null;
 }
 
 export interface ProjectFile {
@@ -30,6 +32,7 @@ export function useEntropy() {
     decodedSource: null,
     extensionInfo: null,
     error: null,
+    systemVersion: null,
   });
 
   const readyRef = useRef(false);
@@ -38,8 +41,9 @@ export function useEntropy() {
   const initialize = useCallback(async () => {
     try {
       await initWasm();
+      const version = getVersion();
       readyRef.current = true;
-      setState(prev => ({ ...prev, ready: true }));
+      setState(prev => ({ ...prev, ready: true, systemVersion: version }));
     } catch (e) {
       setState(prev => ({ ...prev, error: `WASM init failed: ${e}` }));
     }

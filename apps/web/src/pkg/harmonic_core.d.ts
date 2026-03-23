@@ -25,6 +25,11 @@ export function encode_wasm(source: string, extension: string): Uint8Array;
  */
 export function get_extension_info(extension: string): string;
 
+/**
+ * 現在のプロトコルバージョンを返す
+ */
+export function get_version(): string;
+
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 
 export interface InitOutput {
@@ -34,6 +39,7 @@ export interface InitOutput {
     readonly encode_project_wasm: (a: number, b: number) => [number, number, number, number];
     readonly encode_wasm: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly get_extension_info: (a: number, b: number) => [number, number];
+    readonly get_version: () => [number, number];
     readonly __wbindgen_externrefs: WebAssembly.Table;
     readonly __wbindgen_malloc: (a: number, b: number) => number;
     readonly __externref_table_dealloc: (a: number) => void;
