@@ -36,7 +36,7 @@ impl Header {
     /// フルセットのメタイベント用文字列（グローバルヘッダー用）を生成する。
     pub fn to_full_meta_strings(&self) -> Vec<String> {
         vec![
-            "LOGISCORE:v1.3".to_string(),
+            "LOGISCORE:v1.4".to_string(),
             format!("SCALE:{}", self.scale_id),
             format!("ROOT:{}", self.root_key),
             format!("BPT:{}", self.bytes_per_tick),

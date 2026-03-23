@@ -102,6 +102,7 @@ fn append_file_to_track(
 
     // Local Metadata (Includes SCALE, ROOT, BPT to override global defaults)
     let meta_strings = vec![
+        "V:1.4".to_string(),
         format!("SCALE:{}", header.scale_id),
         format!("ROOT:{}", header.root_key),
         format!("BPT:{}", header.bytes_per_tick),
