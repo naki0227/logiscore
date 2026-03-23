@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://logiscore.enludus.com/sitemap.xml
