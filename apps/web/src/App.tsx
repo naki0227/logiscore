@@ -112,6 +112,7 @@ function App() {
   const [uiMode, setUiMode] = useState<'encode' | 'decode'>('encode');
   const [isProjectMode, setIsProjectMode] = useState(false);
   const [projectFiles, setProjectFiles] = useState<{name: string, source: string, extension: string}[]>([]);
+  const [projectVerified, setProjectVerified] = useState(false);
   const [filename, setFilename] = useState('logiscore_output');
 
   useEffect(() => {
@@ -152,6 +153,28 @@ function App() {
       const midi = encodeProjectSource(projectFiles);
       if (midi) {
         setStatus(`SYMPHONY CREATED: ${midi.length} BYTES`);
+        
+        // 巨大なプロジェクトの場合はデコード検証に時間がかかるため非同期で実行
+        setTimeout(() => {
+            try {
+                const decoded = decodeProjectSource(midi);
+                if (decoded && decoded.length === projectFiles.length) {
+                    // 全ファイルの source が一致するかチェック
+                    const allMatched = decoded.every((df, idx) => {
+                        return df.source === projectFiles[idx].source;
+                    });
+                    if (allMatched) {
+                        setProjectVerified(true);
+                        setStatus(`✅ SYMPHONY VERIFIED: 100% BIT-PERFECT`);
+                    } else {
+                        setProjectVerified(false);
+                        setStatus(`⚠️ VERIFICATION FAILED: CONTENT MISMATCH`);
+                    }
+                }
+            } catch (e) {
+                console.error("Project verification failed", e);
+            }
+        }, 100);
       }
     } else {
       const midi = encodeSource(sourceCode, extension);
@@ -697,7 +720,7 @@ function App() {
                                         </button>
                                         
                                         <div className="verification-status">
-                                            {verified ? '✅ LOSSLESS VERIFIED' : '... UNVERIFIED'}
+                                            {(isProjectMode ? projectVerified : verified) ? '✅ LOSSLESS VERIFIED' : '... UNVERIFIED'}
                                         </div>
                                         
                                         {decodedSource && (
