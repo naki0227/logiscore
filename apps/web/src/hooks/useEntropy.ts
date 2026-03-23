@@ -114,9 +114,8 @@ export function useEntropy() {
       setState(prev => ({
         ...prev,
         processing: false,
-        error: `Decode failed: ${e}`,
       }));
-      return null;
+      throw e;
     }
   }, []);
 
@@ -129,17 +128,14 @@ export function useEntropy() {
         setState(prev => ({
             ...prev,
             processing: false,
-            // decodedSource: files.map(f => f.source).join('\n\n'), // Optionally combine sources
-            // midiData: midiBytes, // Optionally store midiData
         }));
         return files;
     } catch (e) {
         setState(prev => ({
             ...prev,
             processing: false,
-            error: `Project decode failed: ${e}`,
         }));
-        return null;
+        throw e;
     }
   }, []);
 
