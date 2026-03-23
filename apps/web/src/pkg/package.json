@@ -1,0 +1,16 @@
+{
+  "name": "harmonic-core",
+  "type": "module",
+  "description": "Logiscore: Reversible source code to MIDI encoder/decoder",
+  "version": "0.1.0",
+  "files": [
+    "harmonic_core_bg.wasm",
+    "harmonic_core.js",
+    "harmonic_core.d.ts"
+  ],
+  "main": "harmonic_core.js",
+  "types": "harmonic_core.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
