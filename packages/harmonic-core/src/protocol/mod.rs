@@ -92,36 +92,31 @@ impl Header {
     /// マジックナンバー不在、バージョン不一致、フィールド欠損時にエラー。
     pub fn from_meta_strings(texts: &[String], default: Option<Header>) -> Result<(Self, usize), LogiscoreError> {
         let has_magic = texts.iter().any(|t| t.starts_with("LOGISCORE:"));
-        
-        let header = if has_magic {
-            let magic = texts.iter().find(|t| t.starts_with("LOGISCORE:")).unwrap();
-            if !magic.starts_with("LOGISCORE:v1") {
-                return Err(LogiscoreError::UnsupportedVersion(magic.clone()));
+        let magic = texts.iter().find(|t| t.starts_with("LOGISCORE:"));
+
+        if let Some(m) = magic {
+            if !m.starts_with("LOGISCORE:v1") {
+                return Err(LogiscoreError::UnsupportedVersion(m.clone()));
             }
+        } else if default.is_none() {
+            return Err(LogiscoreError::InvalidMidi("Missing LOGISCORE magic and no global header found".into()));
+        }
 
-            let scale_id = texts
-                .iter()
-                .find(|t| t.starts_with("SCALE:"))
-                .and_then(|t| t[6..].parse::<u8>().ok())
-                .ok_or_else(|| LogiscoreError::InvalidMidi("Missing or invalid SCALE".into()))?;
-
-            let root_key = texts
-                .iter()
-                .find(|t| t.starts_with("ROOT:"))
-                .and_then(|t| t[5..].parse::<u8>().ok())
-                .ok_or_else(|| LogiscoreError::InvalidMidi("Missing or invalid ROOT".into()))?;
-
-            let bytes_per_tick = texts
-                .iter()
-                .find(|t| t.starts_with("BPT:"))
-                .and_then(|t| t[4..].parse::<u8>().ok())
-                .unwrap_or(8);
-
-            Self { scale_id, root_key, bytes_per_tick }
-        } else {
-            // マジックナンバーがない場合はデフォルト（グローバル設定）を使用
-            default.ok_or_else(|| LogiscoreError::InvalidMidi("Missing LOGISCORE magic and no global header found".into()))?
+        // 基本はデフォルト（あれば）、なければ新規パース（magicがある前提）
+        let mut header = match default {
+            Some(d) => d,
+            None => Header { scale_id: 0, root_key: 0, bytes_per_tick: 8 },
         };
+
+        if let Some(s) = texts.iter().find(|t| t.starts_with("SCALE:")) {
+            header.scale_id = s[6..].parse::<u8>().unwrap_or(header.scale_id);
+        }
+        if let Some(s) = texts.iter().find(|t| t.starts_with("ROOT:")) {
+            header.root_key = s[5..].parse::<u8>().unwrap_or(header.root_key);
+        }
+        if let Some(s) = texts.iter().find(|t| t.starts_with("BPT:")) {
+            header.bytes_per_tick = s[4..].parse::<u8>().unwrap_or(header.bytes_per_tick);
+        }
 
         // LEN: または L: からデータ長を取得
         let data_length = texts

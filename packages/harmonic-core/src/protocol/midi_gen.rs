@@ -100,8 +100,13 @@ fn append_file_to_track(
     write_vlq(track_data, marker_bytes.len() as u32);
     track_data.extend_from_slice(marker_bytes);
 
-    // Local Metadata (Minimal: Only length)
-    let meta_strings = header.to_minimal_meta_strings(data.len());
+    // Local Metadata (Includes SCALE, ROOT, BPT to override global defaults)
+    let meta_strings = vec![
+        format!("SCALE:{}", header.scale_id),
+        format!("ROOT:{}", header.root_key),
+        format!("BPT:{}", header.bytes_per_tick),
+        format!("L:{}", data.len()),
+    ];
     for text in &meta_strings {
         write_vlq(track_data, 0);
         track_data.push(0xFF);
