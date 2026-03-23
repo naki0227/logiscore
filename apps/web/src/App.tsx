@@ -650,7 +650,7 @@ function App() {
                                         animate={{ opacity: 1 }}
                                         className="midi-placeholder"
                                     >
-                                        <div className="placeholder-icon">笞｡</div>
+                                        <div className="placeholder-icon">🎵</div>
                                         <p>ENCODE YOUR CODE TO MUSIC</p>
                                     </motion.div>
                                 )}
