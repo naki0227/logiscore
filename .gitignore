@@ -1,0 +1,10 @@
+node_modules/
+dist/
+dist-ssr/
+build/
+target/
+.DS_Store
+*.local
+*.env
+*.mid
+.vscode/
