@@ -145,13 +145,21 @@ pub fn decode_project_wasm(midi_bytes: &[u8]) -> Result<JsValue, JsValue> {
         .map_err(|e: LogiscoreError| JsValue::from_str(&e.to_string()))?;
         
     let results: Vec<ProjectFile> = projects.into_iter()
-        .map(|(name, _header, data)| {
-            let decompressed = compressor::decompress(&data).unwrap_or_default();
-            let source = String::from_utf8(decompressed).unwrap_or_default();
+        .map(|(name, header, data)| {
+            let res_source = match compressor::decompress(&data) {
+                Ok(decomp) => {
+                    match String::from_utf8(decomp) {
+                        Ok(s) => s,
+                        Err(e) => format!("[LOGISCORE ERROR: Invalid UTF-8 in {}: {}]", name, e),
+                    }
+                }
+                Err(e) => format!("[LOGISCORE ERROR: Decompression failed for {}: {} (data_len: {}, bpt: {})]", name, e, data.len(), header.bytes_per_tick),
+            };
+            
             let extension = format!(".{}", name.split('.').last().unwrap_or(""));
             ProjectFile {
                 name,
-                source,
+                source: res_source,
                 extension,
             }
         })
