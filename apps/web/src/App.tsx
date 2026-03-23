@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import JSZip from 'jszip';
 import { useEntropy } from './hooks/useEntropy';
 import { useAudioEngine } from './hooks/useAudioEngine';
 import Visualizer from './components/Visualizer';
@@ -203,6 +204,29 @@ function App() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     setStatus('MIDI DOWNLOADED');
+  };
+
+  const handleDownloadZip = async () => {
+    if (!isProjectMode || projectFiles.length === 0) return;
+    setStatus('CREATING ZIP...');
+    try {
+        const zip = new JSZip();
+        projectFiles.forEach(f => {
+            zip.file(f.name, f.source || '');
+        });
+        const blob = await zip.generateAsync({ type: 'blob' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${filename}_source.zip`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        setStatus('✅ ZIP DOWNLOADED');
+    } catch (e) {
+        setStatus(`❌ ZIP ERROR: ${e}`);
+    }
   };
 
     const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -490,9 +514,14 @@ function App() {
                     >
                         {isProjectMode ? (
                             <div className="project-file-list">
-                                <div className="project-header">
+                                <div className="project-header" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <span className="project-name">{filename}</span>
                                     <span className="project-count">{projectFiles.length} tracks</span>
+                                    {projectFiles.length > 0 && (
+                                        <button className="btn-icon" onClick={handleDownloadZip} title="Download Source ZIP" style={{ marginLeft: 'auto', padding: '4px 8px', fontSize: '11px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                            <Icons.Download /> ZIP
+                                        </button>
+                                    )}
                                 </div>
                                 <div className="file-items">
                                     {projectFiles.map((f) => (
