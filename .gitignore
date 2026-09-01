@@ -8,3 +8,5 @@ target/
 *.env
 *.mid
 .vscode/
+CURRENT_TASK.md
+PROJECT_CONTEXT.md
