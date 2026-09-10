@@ -40,3 +40,9 @@ native codec全体を同じ条件で比較でき、CIや将来の可視化から
 ## 将来的な見直し条件
 
 実端末recording corpus、Opus fixture、CI performance regression thresholdを導入するときに更新する。
+
+Phase 9完了までに、すべてのchannel reportを`Final Recovery Rate / Raw Symbol Accuracy / Corrected Errors / Payload Bitrate / Decode Time / Playback Duration`の6指標へ統一する。現行schemaにないraw symbolおよびFEC correction telemetryはdecoder境界から追加する。
+
+## Opus fixture追記
+
+Opus往復fixtureは、プリエコーで音長境界が変形するrhythmic profileではなく、単音・固定symbol slotの`FixedFallback`を使う。RustでのOpus往復とPlaywrightでのWeb Audio importの両方を確認対象とする。rhythmic profileの損失圧縮対応は別のdecoder改善として追跡する。

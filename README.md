@@ -112,7 +112,7 @@ Phase 4 also provides an 8 kHz clean-PCM transport API for all three payloads. I
 
 Reliable PCM uses v2 FEC profile `1`: CRC-32, Hamming SECDED, 8-codeword bit interleaving, and three-copy majority recovery. The original unprotected profile remains available and wire-compatible.
 
-Reliable mode exports an 8 kHz mono PCM16 WAV that can be played, recorded externally, and imported again. PCM16/float32 WAV is decoded in Rust; other browser-supported recordings such as M4A, MP3, Opus, Ogg, and AAC are converted to mono PCM through Web Audio and resampled by the same Rust decoder.
+Reliable mode exports an 8 kHz mono PCM16 WAV that can be played, recorded externally, and imported again. PCM16/float32 WAV is decoded in Rust; other browser-supported recordings such as M4A, MP3, Opus, Ogg, and AAC are converted to mono PCM through Web Audio and resampled by the same Rust decoder. The automated Opus round-trip currently uses the monophonic Fixed Fallback profile; rhythmic profiles still require tone-boundary hardening after lossy compression.
 
 - Design: [`docs/logiscore_improvement_design.md`](docs/logiscore_improvement_design.md)
 - Current work: [`docs/TODO.md`](docs/TODO.md)

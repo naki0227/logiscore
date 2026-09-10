@@ -8,13 +8,24 @@
   - [完了] 決定論的fixtureとJSON report schema
   - [完了] Dense / Rhythmic / 全Acoustic profile / Secureの速度・size・bitrate計測
   - [完了] 5段階の決定論的channel recovery計測
+  - [進行中] 全channel reportを6共通指標へ統一
+    - [完了] Payload bitrate / Decode time / Playback duration
+    - [未着手] Final Recovery Rate / Raw Symbol Accuracy / Corrected Errorsのtelemetry
   - [未着手] fixture size別reportと回帰比較
-  - [未着手] Opus round-trip fixture
+  - [完了] FixedFallbackのOpus round-trip fixture / Rust・Playwright復元
   - [未着手] smartphone recording corpus
 
 ## 未着手
 
 - [未着手] 701KB超のWeb bundleをcode splittingする
+- [未着手] rhythmic acoustic profileのOpus後プリエコーに耐えるtone-boundary検出を設計する
+- [未着手] v2 field validation 2: MacBook→1m→iPhone Voice Memos→M4AのText/File/Project corpus
+- [未着手] v2 field validation 3: 任意位置・ループ録音のchunk/checkpoint protocol
+- [未着手] v2 field validation 4: 会話・TV・音楽・Café・残響の実環境matrix
+- [未着手] v2 field validation 5: PCM/Opus/AAC/MP3/resampling codec matrix
+- [未着手] v2 field validation 6: WebRTC後にGoogle Meet通信
+- [未着手] v2 field validation 7: VoiceCallProfileと電話回線
+- [未着手] v2 field validation 8: v2公開デモ3本とREADME更新
 
 ## 要確認
 
@@ -111,4 +122,4 @@
 
 ## 次回最初に着手するタスク
 
-Phase 9 Benchmarkの評価軸と再現可能なfixtureを確定する。最初に `docs/logiscore_improvement_design.md` のBenchmark節、`docs/TODO.md`、`apps/web/tests/load/static-assets.js`、`packages/harmonic-core/src/v2/secure_decode.rs` を読む。最初のコマンドは `cargo test --all-targets --all-features --locked` と `npm run test:e2e`。
+Phase 9 Benchmark schemaにFinal Recovery Rate、Raw Symbol Accuracy、Corrected Errorsを追加する。最初に `packages/harmonic-core/src/benchmark.rs`、`packages/harmonic-core/src/error_correction/`、`docs/adr/0012-benchmark-metrics.md` を読む。最初のコマンドは `cargo test --all-targets --all-features --locked` と `npm run test:e2e`。

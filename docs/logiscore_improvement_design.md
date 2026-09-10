@@ -1222,6 +1222,30 @@ vs
 Distance
 ```
 
+Phase 9以降は、すべての通信路を同じbenchmark frameworkで評価する。「できた」と判定するreportには少なくとも次の6指標を含める。
+
+```text
+Final Recovery Rate
+Raw Symbol Accuracy
+Corrected Errors
+Payload Bitrate
+Decode Time
+Playback Duration
+```
+
+wall-clockの速度値と、機能的な成否・精度値は分離する。通信路の限界も結果として保存し、全条件100%を達成条件にしない。
+
+### v2フィールド検証roadmap
+
+1. Phase 9 Benchmarkを完了し、fixture size別report、regression comparison、audio codec fixture、smartphone corpusを共通schemaに載せる。
+2. `MacBook Speaker → 1m → iPhone Voice Memos → M4A → Logiscore`を固定条件にし、Text、File、Projectの順で実録音を成立させる。成功後に3m、5m、別端末へ拡張する。
+3. 録音途中の有効なpreambleを探索し、`Mini Sync / Chunk ID / Chunk Payload / Chunk CRC`で任意開始位置とループ再構成を可能にする。複数周はsoft/vote combine後にFECへ渡す。
+4. Quiet、Conversation、TV、Music、Café-like noise、Reverberant roomの順に条件を厳しくし、Adaptive Profileごとの性能限界を測る。
+5. PCM、Opus、AAC、MP3、resamplingを自動化し、物理環境と独立したcodec耐性matrixにする。
+6. Browser AからBrowser BへのWebRTC/Opusを成立させた後、Echo Cancellation、Noise Suppression、AGC、VAD、packet lossを含むGoogle Meetへ進む。
+7. 電話回線は別通信路として`VoiceCallProfile`を設計し、まず数十byteの完全復元を目指す。
+8. 上記の評価reportとデモを揃えてv2を完成・公開する。Visual Codecはv2 Acousticの性能境界を確定後、v3として開始する。
+
 ---
 
 # 34. 成功条件
@@ -1240,10 +1264,11 @@ Distance
 
 Physical：
 
-- smartphone recordingから復元
+- 固定条件をmetadataに持つ実smartphone recordingから復元
 - quiet roomで安定
 - conversation環境で高成功率
 - FEC後の最終Payload完全一致
+- 6共通benchmark指標と失敗条件をreport化
 
 ---
 
