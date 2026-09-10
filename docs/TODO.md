@@ -24,6 +24,7 @@
 
 ## 完了
 
+- [完了] CI runner Rust 1.98.1で追加されたClippy lint 3件へ適合
 - [完了] v2 Phase 8: Secure Mode
   - [完了] Argon2id / ChaCha20-Poly1305 / CSPRNGの依存選定とADR
   - [完了] versioned Secure Envelopeと認証失敗policy

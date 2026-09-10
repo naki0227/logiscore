@@ -33,10 +33,8 @@ pub(super) fn decode(bits: &[bool]) -> Result<Decoded, LogiscoreError> {
     }
     let mut corrected_codewords = 0;
     let mut data = Vec::with_capacity(bits.len() / CODEWORD_BITS);
-    for chunk in bits.chunks_exact(CODEWORD_BITS) {
-        let mut codeword: [bool; CODEWORD_BITS] = chunk
-            .try_into()
-            .map_err(|_| invalid_fec("Hamming codeword is malformed"))?;
+    for chunk in bits.as_chunks::<CODEWORD_BITS>().0 {
+        let mut codeword = *chunk;
         let syndrome = PARITY_POSITIONS.into_iter().fold(0, |value, parity| {
             if parity_value(&codeword, parity) {
                 value | parity

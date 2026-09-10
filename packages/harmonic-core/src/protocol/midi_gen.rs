@@ -471,21 +471,19 @@ pub fn decode_project_from_midi(
             TrackEventKind::Midi {
                 channel,
                 message: MidiMessage::NoteOn { key, vel },
-            } => {
-                if vel.as_int() > 0 {
-                    if abs_tick != last_tick {
-                        order_counter = 0;
-                        last_tick = abs_tick;
-                    }
-                    current_notes.push(NoteEvent {
-                        abs_tick,
-                        channel: channel.as_int(),
-                        order: order_counter,
-                        note: key.as_int(),
-                        velocity: vel.as_int(),
-                    });
-                    order_counter += 1;
+            } if vel.as_int() > 0 => {
+                if abs_tick != last_tick {
+                    order_counter = 0;
+                    last_tick = abs_tick;
                 }
+                current_notes.push(NoteEvent {
+                    abs_tick,
+                    channel: channel.as_int(),
+                    order: order_counter,
+                    note: key.as_int(),
+                    velocity: vel.as_int(),
+                });
+                order_counter += 1;
             }
             _ => {}
         }
