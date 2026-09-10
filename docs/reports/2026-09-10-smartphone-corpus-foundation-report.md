@@ -54,6 +54,7 @@ Playwright E2E、fixture metadata、収録運用。production Web UI、codec、w
 - `npm run test:e2e`: corpus正常・異常系を含むChromium 22件成功。
 - Web typecheck / E2E typecheck / format / lint / Vitest 42件 / build: 成功。
 - Rust code・依存変更なし。直前commitのRust 175件とCI成功を継承し、push後CIで再確認する。
+- GitHub CI run `34478610203`: 全job成功。ただしReliable Project WAV復元が初回の5秒timeoutを超えretry成功したため、当該重い復号assertionだけ15秒へ明示し再検証する。
 
 ## CIで確認される内容
 
@@ -64,6 +65,7 @@ Web typecheck、E2E typecheck、format、lint、Vitest、build、Playwright全�
 - 実iPhone M4Aはまだ存在しないため、物理round-tripは未達。
 - 実録音PCMからRaw Symbol AccuracyとCorrected Errorsを出すbrowser telemetry境界は未実装。
 - 端末model、部屋、音量などの実測metadataは収録時に確定する。
+- GitHub ActionsのNode.js 20 action runtime廃止warningに対し、対応版actionへの更新確認が必要。
 
 ## 次にやること
 

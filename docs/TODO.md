@@ -34,6 +34,7 @@
 ## 要確認
 
 - [要確認] GitHub Secrets `VERCEL_TOKEN`、`VERCEL_ORG_ID`、`VERCEL_PROJECT_ID`を登録し、Repository Variable `VERCEL_DEPLOY_ENABLED=true`で本番deployを有効化する
+- [要確認] GitHub ActionsのNode.js 20 runtime廃止warningに対応するaction majorが利用可能になったら更新する
 
 ## 技術的負債
 

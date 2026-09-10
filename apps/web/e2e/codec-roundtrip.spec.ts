@@ -194,6 +194,7 @@ test.describe("Logiscore v2 codec scenarios", () => {
 
     await expect(page.getByRole("status")).toHaveText(
       "✅ V2 PROJECT IMPORTED: 2 FILES",
+      { timeout: 15_000 },
     );
     await expect(page.locator(".file-item")).toHaveCount(2);
   });
