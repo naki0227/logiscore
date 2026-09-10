@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 interface PanelProps {
   title: string;
@@ -8,7 +8,13 @@ interface PanelProps {
   verified?: boolean;
 }
 
-const Panel: React.FC<PanelProps> = ({ title, headerAction, children, className = '', verified }) => {
+const Panel: React.FC<PanelProps> = ({
+  title,
+  headerAction,
+  children,
+  className = "",
+  verified,
+}) => {
   return (
     <section className={`panel ${className}`}>
       <div className="panel-header">
@@ -16,9 +22,7 @@ const Panel: React.FC<PanelProps> = ({ title, headerAction, children, className 
         {verified && <span className="verified-badge">✅ VERIFIED</span>}
         {headerAction}
       </div>
-      <div className="panel-content">
-        {children}
-      </div>
+      <div className="panel-content">{children}</div>
     </section>
   );
 };

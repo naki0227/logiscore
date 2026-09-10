@@ -1,73 +1,51 @@
-# React + TypeScript + Vite
+# Logiscore Web
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React、TypeScript、ViteとRust/WASMで動くLogiscoreのブラウザUIです。すべてのcodec処理はクライアント内で完結し、入力したsourceやprojectは外部へ送信されません。
 
-Currently, two official plugins are available:
+## Modes
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- `Auto` / `Fast`: v2 Dense MIDI
+- `Music`: v2 Rhythmic Musical MIDI
+- `Reliable`: CRC/FEC付きの8 kHz mono PCM16 WAV
 
-## React Compiler
+Reliable modeではWAVを再生・downloadし、外部レコーダーで録音したfileを再importできます。PCM16/float32 WAVはRustで直接検証します。M4A、MP3、Opus、Ogg、AACはbrowserが対応している場合にWeb Audioでmono PCMへ変換します。
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Development
 
-## Expanding the ESLint configuration
+先にRust/WASMを生成してからWeb appを起動します。
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+```bash
+cd ../../packages/harmonic-core
+wasm-pack build . --target web --out-dir ../../apps/web/src/pkg
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+cd ../../apps/web
+npm ci
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Quality gates
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```bash
+npm run typecheck
+npm run typecheck:e2e
+npm run format:check
+npm run lint
+npm test
+npm run build
+npm run test:e2e
+npm audit --audit-level=high
+```
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+PlaywrightはDense／Musical MIDIとReliable WAVについて、Text、Source File、Projectのdownload/import round-tripを実ブラウザで自動実行します。またWeb Audio経由の録音PCMと破損音声の拒否も検証します。
+
+k6はproduction previewを対象に実行します。
+
+```bash
+npm run preview -- --host 0.0.0.0 --port 4173
+
+docker run --rm \
+  -v "$PWD/tests/load:/scripts:ro" \
+  grafana/k6:2.2.0 run \
+  -e BASE_URL=http://host.docker.internal:4173 \
+  /scripts/static-assets.js
 ```
