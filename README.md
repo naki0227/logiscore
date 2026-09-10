@@ -74,6 +74,16 @@ docker run --rm --network host \
   /scripts/static-assets.js
 ```
 
+### Production deployment
+
+The GitHub Actions `Vercel production` job runs only after both Rust and Web jobs succeed on `main`. Configure these repository Secrets:
+
+- `VERCEL_TOKEN`
+- `VERCEL_ORG_ID`
+- `VERCEL_PROJECT_ID`
+
+Then set the repository Variable `VERCEL_DEPLOY_ENABLED` to `true`. Keep it disabled while Vercel Git Integration is active to avoid duplicate deployments.
+
 ## 📄 License
 
 MIT
@@ -104,3 +114,6 @@ Reliable mode exports an 8 kHz mono PCM16 WAV that can be played, recorded exter
 - PCM audio decoder: [`docs/adr/0006-pcm-audio-decoder.md`](docs/adr/0006-pcm-audio-decoder.md)
 - Error-correction profile: [`docs/adr/0007-error-correction-profile.md`](docs/adr/0007-error-correction-profile.md)
 - Physical audio workflow: [`docs/adr/0008-physical-audio-workflow.md`](docs/adr/0008-physical-audio-workflow.md)
+- Adaptive profile selection: [`docs/adr/0009-adaptive-profile-selection.md`](docs/adr/0009-adaptive-profile-selection.md)
+- Secure envelope: [`docs/adr/0010-secure-envelope.md`](docs/adr/0010-secure-envelope.md)
+- Vercel deployment gate: [`docs/adr/0011-vercel-deployment-gate.md`](docs/adr/0011-vercel-deployment-gate.md)

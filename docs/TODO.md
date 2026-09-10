@@ -12,7 +12,7 @@
 
 ## 要確認
 
-- なし
+- [要確認] GitHub Secrets `VERCEL_TOKEN`、`VERCEL_ORG_ID`、`VERCEL_PROJECT_ID`を登録し、Repository Variable `VERCEL_DEPLOY_ENABLED=true`で本番deployを有効化する
 
 ## 技術的負債
 
@@ -24,6 +24,7 @@
 
 ## 完了
 
+- [完了] Rust/Web CI成功後だけ実行可能なVercel production deploy jobを追加
 - [完了] CI runner Rust 1.98.1で追加されたClippy lint 3件へ適合
 - [完了] v2 Phase 8: Secure Mode
   - [完了] Argon2id / ChaCha20-Poly1305 / CSPRNGの依存選定とADR
