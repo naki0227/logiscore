@@ -24,6 +24,23 @@ pub fn decompress(input: &[u8]) -> Result<Vec<u8>, std::io::Error> {
     Ok(output)
 }
 
+/// zlibデータを上限付きで展開し、decompression bombを拒否する。
+pub fn decompress_limited(input: &[u8], max_length: usize) -> Result<Vec<u8>, std::io::Error> {
+    let decoder = ZlibDecoder::new(input);
+    let limit = u64::try_from(max_length)
+        .map_err(|_| std::io::Error::other("decompression limit exceeds u64"))?
+        .saturating_add(1);
+    let mut output = Vec::new();
+    decoder.take(limit).read_to_end(&mut output)?;
+    if output.len() > max_length {
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::InvalidData,
+            "decompressed data exceeds configured limit",
+        ));
+    }
+    Ok(output)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -57,5 +74,12 @@ mod tests {
         let input = "fn main() { println!(\"Hello\"); }\n".repeat(100);
         let compressed = compress(input.as_bytes()).unwrap();
         assert!(compressed.len() < input.len());
+    }
+
+    #[test]
+    fn limited_decompression_rejects_oversized_output() {
+        let compressed = compress(&[0; 1024]).unwrap();
+        assert!(decompress_limited(&compressed, 1023).is_err());
+        assert_eq!(decompress_limited(&compressed, 1024).unwrap().len(), 1024);
     }
 }

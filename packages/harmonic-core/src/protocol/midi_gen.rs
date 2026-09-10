@@ -1,13 +1,7 @@
 use crate::error::LogiscoreError;
-use crate::protocol::{Header, HarmonicByte};
 use crate::protocol::scales::SCALES;
-use midly::{
-    MetaMessage, MidiMessage, Smf,
-    TrackEventKind,
-};
-
-/// 最小密度 (安全性のため)
-const MIN_BYTES_PER_TICK: usize = 1;
+use crate::protocol::{HarmonicByte, Header};
+use midly::{MetaMessage, MidiMessage, Smf, TrackEventKind};
 
 #[derive(Clone, Copy)]
 struct NoteEvent {
@@ -58,17 +52,24 @@ pub fn encode_project_to_midi(
     } else if num_files <= 100 {
         14400 // 約15秒
     } else if num_files <= 500 {
-        7200  // 約7.5秒
+        7200 // 約7.5秒
     } else {
-        2400  // 約2.5秒
+        2400 // 約2.5秒
     };
 
     // --- Append each file sequentially ---
     for (i, (name, data, header)) in files.iter().enumerate() {
         let channel = (i % 15) as u8;
         let real_channel = if channel >= 9 { channel + 1 } else { channel };
-        
-        append_file_to_track(&mut track_data, name, data, header, real_channel, target_total_ticks)?;
+
+        append_file_to_track(
+            &mut track_data,
+            name,
+            data,
+            header,
+            real_channel,
+            target_total_ticks,
+        )?;
     }
 
     // End of Track
@@ -119,26 +120,27 @@ fn append_file_to_track(
 
     // Instrument (Logiscore Philharmonic Orchestra Mapping)
     let lower_name = name.to_lowercase();
-    let ext = name.split('.').last().unwrap_or("").to_lowercase();
-    
+    let ext = name.split('.').next_back().unwrap_or("").to_lowercase();
+
     let program = match ext.as_str() {
         "rs" | "cpp" | "c" | "h" | "hpp" => 48, // Strings Ensemble 1
-        "py" | "rb" | "dart" | "swift" => 42, // Cello
-        "java" | "kt" | "kts" => 45, // Pizzicato Strings
-        "go" => 60, // French Horn
-        "sh" | "bash" | "zsh" => 56, // Trumpet
-        "ts" | "js" | "tsx" | "jsx" => 71, // Clarinet
+        "py" | "rb" | "dart" | "swift" => 42,   // Cello
+        "java" | "kt" | "kts" => 45,            // Pizzicato Strings
+        "go" => 60,                             // French Horn
+        "sh" | "bash" | "zsh" => 56,            // Trumpet
+        "ts" | "js" | "tsx" | "jsx" => 71,      // Clarinet
         "css" | "scss" | "sass" | "less" | "html" | "svg" => 73, // Flute
         "md" | "json" | "yaml" | "yml" | "toml" | "xml" | "txt" | "env" => 46, // Harp
-        "sql" => 47, // Timpani
+        "sql" => 47,                            // Timpani
         _ => {
             // Check for build/infra files (Tubular Bells)
-            if lower_name.contains("dockerfile") || 
-               lower_name.contains("makefile") || 
-               lower_name.contains("gemfile") || 
-               lower_name.contains("cargo.toml") || 
-               lower_name.contains("package.json") ||
-               lower_name.contains("go.mod") {
+            if lower_name.contains("dockerfile")
+                || lower_name.contains("makefile")
+                || lower_name.contains("gemfile")
+                || lower_name.contains("cargo.toml")
+                || lower_name.contains("package.json")
+                || lower_name.contains("go.mod")
+            {
                 14 // Tubular Bells
             } else {
                 0 // Grand Piano
@@ -152,8 +154,12 @@ fn append_file_to_track(
     // Notes
     let scale = &SCALES[header.scale_id as usize];
     let bpt = header.bytes_per_tick as usize;
-    let num_ticks = if data.is_empty() { 0 } else { data.len().div_ceil(bpt) };
-    
+    let num_ticks = if data.is_empty() {
+        0
+    } else {
+        data.len().div_ceil(bpt)
+    };
+
     let delta_per_tick = if num_ticks > 0 {
         (target_total_ticks / num_ticks as u32).clamp(4, 127)
     } else {
@@ -167,19 +173,27 @@ fn append_file_to_track(
     for tick in 0..num_ticks {
         // NoteOn
         for note_in_tick in 0..bpt {
-            let byte = if data_idx < data.len() { data[data_idx] } else { 0x00 };
+            let byte = if data_idx < data.len() {
+                data[data_idx]
+            } else {
+                0x00
+            };
             data_idx += 1;
             let hb = HarmonicByte::from_byte(byte);
             let note = hb.to_midi_note(header.root_key, scale, tick as u64);
             let velocity = hb.to_midi_velocity().max(1); // 0は NoteOff 用なので最低 1 を確保
 
             let delta = if note_in_tick == 0 {
-                if tick == 0 { 0 } else { rest_duration }
+                if tick == 0 {
+                    0
+                } else {
+                    rest_duration
+                }
             } else {
                 0
             };
             write_vlq(track_data, delta);
-            
+
             // Running Status: 0x90 | channel (Note On)
             let status = 0x90 | (channel & 0x0F);
             if status != last_status {
@@ -192,14 +206,14 @@ fn append_file_to_track(
         // NoteOff (Instead of 0x80, use 0x90 with Vel=0 to keep Running Status)
         for note_in_tick in 0..bpt {
             let delta = if note_in_tick == 0 { note_duration } else { 0 };
-            
+
             let idx = (data_idx - bpt) + note_in_tick;
             let byte = if idx < data.len() { data[idx] } else { 0x00 };
             let hb = HarmonicByte::from_byte(byte);
             let note = hb.to_midi_note(header.root_key, scale, tick as u64);
 
             write_vlq(track_data, delta);
-            
+
             // Status remains 0x90. If last_status is already 0x90 | channel, we PUSH NOTHING.
             let status = 0x90 | (channel & 0x0F);
             if status != last_status {
@@ -220,7 +234,11 @@ pub fn encode_to_midi(data: &[u8], header: &Header) -> Result<Vec<u8>, Logiscore
 }
 
 /// MIDI バイナリを直接構築する。
-fn build_midi_binary(data: &[u8], header: &Header, scale: &[u8; 16]) -> Result<Vec<u8>, LogiscoreError> {
+fn build_midi_binary(
+    data: &[u8],
+    header: &Header,
+    scale: &[u8; 16],
+) -> Result<Vec<u8>, LogiscoreError> {
     let mut track_data: Vec<u8> = Vec::new();
 
     // Track Name
@@ -238,7 +256,7 @@ fn build_midi_binary(data: &[u8], header: &Header, scale: &[u8; 16]) -> Result<V
     // Metadata
     let mut meta_strings = header.to_full_meta_strings();
     meta_strings.extend(header.to_minimal_meta_strings(data.len()));
-    
+
     for text in &meta_strings {
         write_vlq(&mut track_data, 0);
         track_data.push(0xFF);
@@ -251,12 +269,16 @@ fn build_midi_binary(data: &[u8], header: &Header, scale: &[u8; 16]) -> Result<V
     // Instrument
     write_vlq(&mut track_data, 0);
     track_data.push(0xC0); // Channel 0
-    track_data.push(0);    // Grand Piano
+    track_data.push(0); // Grand Piano
 
     // Encoding notes
     let bpt = header.bytes_per_tick as usize;
-    let num_ticks = if data.is_empty() { 0 } else { data.len().div_ceil(bpt) };
-    
+    let num_ticks = if data.is_empty() {
+        0
+    } else {
+        data.len().div_ceil(bpt)
+    };
+
     let target_total_ticks = 43200u32;
     let delta_per_tick = if num_ticks > 0 {
         (target_total_ticks / num_ticks as u32).clamp(48, 480)
@@ -271,15 +293,27 @@ fn build_midi_binary(data: &[u8], header: &Header, scale: &[u8; 16]) -> Result<V
     for tick in 0..num_ticks {
         // NoteOn
         for note_in_tick in 0..bpt {
-            let byte = if data_idx < data.len() { data[data_idx] } else { 0x00 };
+            let byte = if data_idx < data.len() {
+                data[data_idx]
+            } else {
+                0x00
+            };
             data_idx += 1;
             let hb = HarmonicByte::from_byte(byte);
             let note = hb.to_midi_note(header.root_key, scale, tick as u64);
             let velocity = hb.to_midi_velocity();
 
-            let delta = if note_in_tick == 0 { if tick == 0 { 0 } else { rest_duration } } else { 0 };
+            let delta = if note_in_tick == 0 {
+                if tick == 0 {
+                    0
+                } else {
+                    rest_duration
+                }
+            } else {
+                0
+            };
             write_vlq(&mut track_data, delta);
-            
+
             // Running Status: 0x90
             let status = 0x90;
             if status != last_status {
@@ -299,7 +333,7 @@ fn build_midi_binary(data: &[u8], header: &Header, scale: &[u8; 16]) -> Result<V
 
             let delta = if note_in_tick == 0 { note_duration } else { 0 };
             write_vlq(&mut track_data, delta);
-            
+
             // Running Status: 0x80
             let status = 0x80;
             if status != last_status {
@@ -332,10 +366,12 @@ fn build_midi_binary(data: &[u8], header: &Header, scale: &[u8; 16]) -> Result<V
 
 /// MIDI バイナリからデータバイト列を復元する。
 pub fn decode_from_midi(midi_bytes: &[u8]) -> Result<(Header, Vec<u8>), LogiscoreError> {
-    let smf = Smf::parse(midi_bytes)
-        .map_err(|e| LogiscoreError::MidiParseError(e.to_string()))?;
-    let track = smf.tracks.first().ok_or_else(|| LogiscoreError::InvalidMidi("No tracks found".into()))?;
-    
+    let smf = Smf::parse(midi_bytes).map_err(|e| LogiscoreError::MidiParseError(e.to_string()))?;
+    let track = smf
+        .tracks
+        .first()
+        .ok_or_else(|| LogiscoreError::InvalidMidi("No tracks found".into()))?;
+
     let mut meta_texts = Vec::new();
     for event in track {
         if let TrackEventKind::Meta(MetaMessage::Text(text_bytes)) = event.kind {
@@ -351,7 +387,11 @@ pub fn decode_from_midi(midi_bytes: &[u8]) -> Result<(Header, Vec<u8>), Logiscor
     let mut order_counter = 0;
     for event in track {
         abs_tick += event.delta.as_int() as u64;
-        if let TrackEventKind::Midi { message: MidiMessage::NoteOn { key, vel }, channel } = event.kind {
+        if let TrackEventKind::Midi {
+            message: MidiMessage::NoteOn { key, vel },
+            channel,
+        } = event.kind
+        {
             if vel.as_int() > 0 {
                 if abs_tick != last_tick {
                     order_counter = 0;
@@ -373,16 +413,20 @@ pub fn decode_from_midi(midi_bytes: &[u8]) -> Result<(Header, Vec<u8>), Logiscor
 }
 
 /// プロジェクト全体の MIDI (Sequential Marker 入) から各ファイルを復元する。
-pub fn decode_project_from_midi(midi_bytes: &[u8]) -> Result<Vec<(String, Header, Vec<u8>)>, LogiscoreError> {
-    let smf = Smf::parse(midi_bytes)
-        .map_err(|e| LogiscoreError::MidiParseError(e.to_string()))?;
+pub fn decode_project_from_midi(
+    midi_bytes: &[u8],
+) -> Result<Vec<(String, Header, Vec<u8>)>, LogiscoreError> {
+    let smf = Smf::parse(midi_bytes).map_err(|e| LogiscoreError::MidiParseError(e.to_string()))?;
 
-    let track = smf.tracks.first().ok_or_else(|| LogiscoreError::InvalidMidi("No tracks found".into()))?;
+    let track = smf
+        .tracks
+        .first()
+        .ok_or_else(|| LogiscoreError::InvalidMidi("No tracks found".into()))?;
 
     let mut projects: Vec<(String, Header, Vec<u8>)> = Vec::new();
     let mut current_file_name: Option<String> = None;
     let mut current_meta_texts: Vec<String> = Vec::new();
-    
+
     let mut current_notes: Vec<NoteEvent> = Vec::new();
     let mut abs_tick: u64 = 0;
     let mut order_counter: usize = 0;
@@ -398,13 +442,14 @@ pub fn decode_project_from_midi(midi_bytes: &[u8]) -> Result<Vec<(String, Header
                 // ファイルの切り替わり
                 if let Some(name) = current_file_name.take() {
                     // 前のファイルを処理
-                    let (header, data) = decode_notes_to_data(&current_meta_texts, &current_notes, global_header)?;
+                    let (header, data) =
+                        decode_notes_to_data(&current_meta_texts, &current_notes, global_header)?;
                     projects.push((name, header, data));
                 }
                 // 初期化
                 if let Ok(marker_text) = std::str::from_utf8(marker_bytes) {
-                    if marker_text.starts_with("FILE:") {
-                        current_file_name = Some(marker_text[5..].to_string());
+                    if let Some(file_name) = marker_text.strip_prefix("FILE:") {
+                        current_file_name = Some(file_name.to_string());
                     }
                 }
                 current_meta_texts.clear();
@@ -423,7 +468,10 @@ pub fn decode_project_from_midi(midi_bytes: &[u8]) -> Result<Vec<(String, Header
                     }
                 }
             }
-            TrackEventKind::Midi { channel, message: MidiMessage::NoteOn { key, vel } } => {
+            TrackEventKind::Midi {
+                channel,
+                message: MidiMessage::NoteOn { key, vel },
+            } => {
                 if vel.as_int() > 0 {
                     if abs_tick != last_tick {
                         order_counter = 0;
@@ -445,38 +493,52 @@ pub fn decode_project_from_midi(midi_bytes: &[u8]) -> Result<Vec<(String, Header
 
     // 最後のファイルを処理
     if let Some(name) = current_file_name {
-        let (header, data) = decode_notes_to_data(&current_meta_texts, &current_notes, global_header)?;
+        let (header, data) =
+            decode_notes_to_data(&current_meta_texts, &current_notes, global_header)?;
         projects.push((name, header, data));
     }
 
     Ok(projects)
 }
 
-fn decode_notes_to_data(meta_texts: &[String], notes: &[NoteEvent], default: Option<Header>) -> Result<(Header, Vec<u8>), LogiscoreError> {
+fn decode_notes_to_data(
+    meta_texts: &[String],
+    notes: &[NoteEvent],
+    default: Option<Header>,
+) -> Result<(Header, Vec<u8>), LogiscoreError> {
     let (header, data_length) = Header::from_meta_strings(meta_texts, default)?;
     let scale = &SCALES[header.scale_id as usize];
-    
+
     // ソート (絶対時間 + チャンネル + 出現順)
     let mut sorted_notes = notes.to_vec();
     sorted_notes.sort_by(|a, b| {
-        a.abs_tick.cmp(&b.abs_tick)
+        a.abs_tick
+            .cmp(&b.abs_tick)
             .then(a.channel.cmp(&b.channel))
             .then(a.order.cmp(&b.order))
     });
 
     let bpt = header.bytes_per_tick as usize;
     let mut restored_bytes: Vec<u8> = Vec::new();
-    
+
     for (index, event) in sorted_notes.iter().enumerate() {
         let logical_tick = (index / bpt) as u64;
-        let pitch_offset = HarmonicByte::pitch_from_midi_note(event.note, header.root_key, scale, logical_tick)?;
+        let pitch_offset =
+            HarmonicByte::pitch_from_midi_note(event.note, header.root_key, scale, logical_tick)?;
         let velocity_idx = HarmonicByte::velocity_from_midi(event.velocity);
-        let hb = HarmonicByte { pitch_offset, velocity: velocity_idx };
+        let hb = HarmonicByte {
+            pitch_offset,
+            velocity: velocity_idx,
+        };
         restored_bytes.push(hb.to_byte());
     }
 
     if restored_bytes.len() < data_length {
-        return Err(LogiscoreError::InvalidMidi(format!("Truncated data: expected {}, got {}", data_length, restored_bytes.len())));
+        return Err(LogiscoreError::InvalidMidi(format!(
+            "Truncated data: expected {}, got {}",
+            data_length,
+            restored_bytes.len()
+        )));
     }
     restored_bytes.truncate(data_length);
     Ok((header, restored_bytes))
@@ -594,8 +656,16 @@ mod tests {
                 let header = Header::new(scale_id, root_key, 8).unwrap();
                 let midi = encode_to_midi(&data, &header).unwrap();
                 let (dec_header, dec_data) = decode_from_midi(&midi).unwrap();
-                assert_eq!(header, dec_header, "Header mismatch for scale={}, root={}", scale_id, root_key);
-                assert_eq!(data, dec_data, "Data mismatch for scale={}, root={}", scale_id, root_key);
+                assert_eq!(
+                    header, dec_header,
+                    "Header mismatch for scale={}, root={}",
+                    scale_id, root_key
+                );
+                assert_eq!(
+                    data, dec_data,
+                    "Data mismatch for scale={}, root={}",
+                    scale_id, root_key
+                );
             }
         }
     }
@@ -623,6 +693,9 @@ mod tests {
         midi.extend_from_slice(&track_data);
 
         let result = decode_from_midi(&midi);
-        assert!(result.is_err(), "Should reject MIDI without LOGISCORE magic");
+        assert!(
+            result.is_err(),
+            "Should reject MIDI without LOGISCORE magic"
+        );
     }
 }

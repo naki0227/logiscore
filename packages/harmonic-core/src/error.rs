@@ -21,6 +21,30 @@ pub enum LogiscoreError {
     #[error("Invalid MIDI: {0}")]
     InvalidMidi(String),
 
+    #[error("Invalid audio: {0}")]
+    InvalidAudio(String),
+
+    #[error("Invalid error-correction frame: {0}")]
+    InvalidFec(String),
+
+    #[error("Invalid adaptive profile: {0}")]
+    InvalidProfile(String),
+
+    #[error("Password must contain between 1 and 1024 UTF-8 bytes")]
+    InvalidPassword,
+
+    #[error("Secure payload authentication failed")]
+    AuthenticationFailed,
+
+    #[error("Invalid secure envelope: {0}")]
+    InvalidSecureEnvelope(String),
+
+    #[error("Secure mode is unavailable")]
+    SecureModeUnavailable,
+
     #[error("Unsupported protocol version: {0}")]
     UnsupportedVersion(String),
+
+    #[error("Invalid v2 packet: {0}")]
+    InvalidPacket(String),
 }

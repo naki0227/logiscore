@@ -26,8 +26,8 @@ impl Header {
         if scale_id as usize >= crate::protocol::scales::SCALES.len() {
             return Err(LogiscoreError::InvalidHeader(scale_id));
         }
-        Ok(Self { 
-            scale_id, 
+        Ok(Self {
+            scale_id,
             root_key,
             bytes_per_tick,
         })
@@ -45,16 +45,16 @@ impl Header {
 
     /// 最小限のメタイベント用文字列（データ長のみ）を生成する。
     pub fn to_minimal_meta_strings(&self, data_length: usize) -> Vec<String> {
-        vec![
-            format!("L:{}", data_length),
-        ]
+        vec![format!("L:{}", data_length)]
     }
 
     /// グローバルヘッダー用（データ長を要求しない）のパース処理
     pub fn from_global_meta_strings(texts: &[String]) -> Result<Self, LogiscoreError> {
         let has_magic = texts.iter().any(|t| t.starts_with("LOGISCORE:"));
         if !has_magic {
-            return Err(LogiscoreError::InvalidMidi("Missing LOGISCORE magic for global header".into()));
+            return Err(LogiscoreError::InvalidMidi(
+                "Missing LOGISCORE magic for global header".into(),
+            ));
         }
 
         let magic = texts.iter().find(|t| t.starts_with("LOGISCORE:")).unwrap();
@@ -80,7 +80,11 @@ impl Header {
             .and_then(|t| t[4..].parse::<u8>().ok())
             .unwrap_or(8);
 
-        Ok(Self { scale_id, root_key, bytes_per_tick })
+        Ok(Self {
+            scale_id,
+            root_key,
+            bytes_per_tick,
+        })
     }
 
     /// メタイベント文字列群からパースする。
@@ -90,8 +94,10 @@ impl Header {
     ///
     /// # Errors
     /// マジックナンバー不在、バージョン不一致、フィールド欠損時にエラー。
-    pub fn from_meta_strings(texts: &[String], default: Option<Header>) -> Result<(Self, usize), LogiscoreError> {
-        let has_magic = texts.iter().any(|t| t.starts_with("LOGISCORE:"));
+    pub fn from_meta_strings(
+        texts: &[String],
+        default: Option<Header>,
+    ) -> Result<(Self, usize), LogiscoreError> {
         let magic = texts.iter().find(|t| t.starts_with("LOGISCORE:"));
 
         if let Some(m) = magic {
@@ -99,13 +105,19 @@ impl Header {
                 return Err(LogiscoreError::UnsupportedVersion(m.clone()));
             }
         } else if default.is_none() {
-            return Err(LogiscoreError::InvalidMidi("Missing LOGISCORE magic and no global header found".into()));
+            return Err(LogiscoreError::InvalidMidi(
+                "Missing LOGISCORE magic and no global header found".into(),
+            ));
         }
 
         // 基本はデフォルト（あれば）、なければ新規パース（magicがある前提）
         let mut header = match default {
             Some(d) => d,
-            None => Header { scale_id: 0, root_key: 0, bytes_per_tick: 8 },
+            None => Header {
+                scale_id: 0,
+                root_key: 0,
+                bytes_per_tick: 8,
+            },
         };
 
         if let Some(s) = texts.iter().find(|t| t.starts_with("SCALE:")) {
@@ -123,10 +135,10 @@ impl Header {
             .iter()
             .find(|t| t.starts_with("LEN:") || t.starts_with("L:"))
             .and_then(|t| {
-                if t.starts_with("LEN:") {
-                    t[4..].parse::<usize>().ok()
+                if let Some(length) = t.strip_prefix("LEN:") {
+                    length.parse::<usize>().ok()
                 } else {
-                    t[2..].parse::<usize>().ok()
+                    t.strip_prefix("L:")?.parse::<usize>().ok()
                 }
             })
             .ok_or_else(|| LogiscoreError::InvalidMidi("Missing or invalid LEN/L".into()))?;
@@ -200,17 +212,17 @@ impl HarmonicByte {
         let prog_offset = Self::get_progression_offset(abs_tick);
         let base = 48u8.saturating_add(root_key).saturating_add(prog_offset);
         let relative = note.saturating_sub(base);
-        
+
         // 完全一致を試みる
         if let Some(index) = scale.iter().position(|&n| n == relative) {
             return Ok((index as i8) - 8);
         }
-        
+
         // フォールバック: 最も近い音を探す（堅牢性向上）
         let mut best_index = 0usize;
         let mut best_diff = u8::MAX;
         for (i, &n) in scale.iter().enumerate() {
-            let diff = if relative >= n { relative - n } else { n - relative };
+            let diff = relative.abs_diff(n);
             if diff < best_diff {
                 best_diff = diff;
                 best_index = i;
@@ -236,6 +248,7 @@ impl HarmonicByte {
 
 pub mod midi_gen;
 pub mod scales;
+pub mod v2;
 
 #[cfg(test)]
 mod tests {
@@ -311,7 +324,11 @@ mod tests {
 
     #[test]
     fn header_rejects_missing_magic() {
-        let texts = vec!["SCALE:0".to_string(), "ROOT:0".to_string(), "LEN:10".to_string()];
+        let texts = vec![
+            "SCALE:0".to_string(),
+            "ROOT:0".to_string(),
+            "LEN:10".to_string(),
+        ];
         assert!(Header::from_meta_strings(&texts, None).is_err());
     }
 

@@ -1,5 +1,5 @@
 use clap::{Parser, Subcommand};
-use harmonic_core::{encode, decode};
+use harmonic_core::{decode, encode};
 use std::fs;
 use std::path::PathBuf;
 
@@ -37,32 +37,30 @@ fn main() -> anyhow::Result<()> {
     match cli.command {
         Commands::Encode { input, output } => {
             let source = fs::read_to_string(&input)?;
-            let extension = input.extension()
-                .and_then(|s| s.to_str())
-                .unwrap_or("txt");
-            
+            let extension = input.extension().and_then(|s| s.to_str()).unwrap_or("txt");
+
             println!("Encoding {} (ext: {})...", input.display(), extension);
-            
+
             let midi_data = encode(&source, extension)
                 .map_err(|e| anyhow::anyhow!("Encoding error: {:?}", e))?;
-            
+
             let out_path = output.unwrap_or_else(|| {
                 let mut p = input.clone();
                 p.set_extension("mid");
                 p
             });
-            
+
             fs::write(&out_path, midi_data)?;
             println!("✅ Exported to: {}", out_path.display());
         }
         Commands::Decode { input, output } => {
             let midi_bytes = fs::read(&input)?;
-            
+
             println!("Decoding {}...", input.display());
-            
-            let (decoded_text, extension) = decode(&midi_bytes)
-                .map_err(|e| anyhow::anyhow!("Decoding error: {:?}", e))?;
-            
+
+            let (decoded_text, extension) =
+                decode(&midi_bytes).map_err(|e| anyhow::anyhow!("Decoding error: {:?}", e))?;
+
             println!("Detected Language/Extension: {}", extension);
 
             match output {

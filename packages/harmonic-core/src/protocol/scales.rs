@@ -78,10 +78,7 @@ const fn assert_note_range_valid() {
     while s < SCALES.len() {
         let max_offset = SCALES[s][15];
         let max_note = 11u8 + max_offset; // Root Key B + 最大オフセット
-        assert!(
-            max_note <= 127,
-            "MIDI note number exceeds 127"
-        );
+        assert!(max_note <= 127, "MIDI note number exceeds 127");
         s += 1;
     }
 }

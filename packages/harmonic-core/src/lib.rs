@@ -1,9 +1,26 @@
+pub mod adaptive;
+pub mod audio;
 pub mod compressor;
+mod density;
 pub mod dispatcher;
 pub mod error;
+pub mod error_correction;
+pub mod musical;
+pub mod payload;
+pub mod project_payload;
 pub mod protocol;
+pub mod secure;
+pub mod transport;
+pub mod v2;
+mod v2_packet;
+mod v2_secure_packet;
+mod wasm_adaptive;
+mod wasm_audio;
+mod wasm_secure;
+mod wasm_v2;
 
 use crate::error::LogiscoreError;
+use density::calculate_optimal_density;
 use protocol::Header;
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
@@ -27,13 +44,14 @@ pub fn encode_wasm(source: &str, extension: &str) -> Result<Vec<u8>, JsValue> {
 /// 戻り値は { source: string, extension: string } の Promise/Result。
 #[wasm_bindgen]
 pub fn decode_wasm(midi_bytes: &[u8]) -> Result<String, JsValue> {
-    let (source, extension) = decode(midi_bytes).map_err(|e: LogiscoreError| JsValue::from_str(&e.to_string()))?;
-    
+    let (source, extension) =
+        decode(midi_bytes).map_err(|e: LogiscoreError| JsValue::from_str(&e.to_string()))?;
+
     let res = serde_json::json!({
         "source": source,
         "extension": extension,
     });
-    
+
     Ok(res.to_string())
 }
 
@@ -45,19 +63,20 @@ pub fn encode_project_wasm(input_json: &str) -> Result<Vec<u8>, JsValue> {
         .map_err(|e| JsValue::from_str(&format!("Invalid JSON: {}", e)))?;
 
     let mut project_data = Vec::new();
-    
+
     // Global Header
-    let global_header = Header::new(0, 0, 8).map_err(|e: LogiscoreError| JsValue::from_str(&e.to_string()))?;
+    let global_header =
+        Header::new(0, 0, 8).map_err(|e: LogiscoreError| JsValue::from_str(&e.to_string()))?;
 
     for pf in files {
         let compressed = compressor::compress(pf.source.as_bytes())
             .map_err(|e: std::io::Error| JsValue::from_str(&e.to_string()))?;
-        
+
         let mut header = dispatcher::header_for_extension(&pf.extension)
             .map_err(|e: LogiscoreError| JsValue::from_str(&e.to_string()))?;
-        
+
         header.bytes_per_tick = calculate_optimal_density(compressed.len());
-        
+
         project_data.push((pf.name, compressed, header));
     }
 
@@ -87,33 +106,13 @@ pub fn get_version() -> String {
 // --- Rust ネイティブ API ---
 
 /// ソースコードを MIDI バイナリにエンコードする。
-///
-/// # Arguments
-/// * `source` - ソースコード文字列
-/// * `extension` - ファイル拡張子 (例: ".rs", ".py")
-///
-/// # Returns
-/// SMF (Standard MIDI File) バイナリの `Vec<u8>`。
-///
-/// # Errors
-/// 圧縮失敗、ヘッダー生成失敗、MIDI構築失敗時にエラーを返す。
-/// データの長さから最適な密度 (1拍あたりのバイト数) を算出する。
-/// 目標演奏時間は 200拍 (約50秒)。
-fn calculate_optimal_density(data_len: usize) -> u8 {
-    if data_len == 0 { return 1; }
-    let target_ticks = 200;
-    let bpt = (data_len + target_ticks - 1) / target_ticks;
-    bpt.clamp(1, 255) as u8
-}
-
-/// ソースコードを MIDI バイナリにエンコードする。
 pub fn encode(source: &str, extension: &str) -> Result<Vec<u8>, LogiscoreError> {
     // 1. 圧縮
     let compressed = compressor::compress(source.as_bytes())?;
 
     // 2. 拡張子 → Header 決定
     let mut header = dispatcher::header_for_extension(extension)?;
-    
+
     // 3. 密度を動的に最適化
     header.bytes_per_tick = calculate_optimal_density(compressed.len());
 
@@ -140,29 +139,34 @@ pub fn decode(midi_bytes: &[u8]) -> Result<(String, String), LogiscoreError> {
 
     // 4. UTF-8 文字列に変換
     let source = String::from_utf8(decompressed).map_err(LogiscoreError::from)?;
-    
+
     Ok((source, extension))
 }
-use crate::protocol::midi_gen::{decode_from_midi, decode_project_from_midi, encode_project_to_midi, encode_to_midi};
+use crate::protocol::midi_gen::decode_project_from_midi;
 
 #[wasm_bindgen]
 pub fn decode_project_wasm(midi_bytes: &[u8]) -> Result<JsValue, JsValue> {
     let projects = decode_project_from_midi(midi_bytes)
         .map_err(|e: LogiscoreError| JsValue::from_str(&e.to_string()))?;
-        
-    let results: Vec<ProjectFile> = projects.into_iter()
+
+    let results: Vec<ProjectFile> = projects
+        .into_iter()
         .map(|(name, header, data)| {
             let res_source = match compressor::decompress(&data) {
-                Ok(decomp) => {
-                    match String::from_utf8(decomp) {
-                        Ok(s) => s,
-                        Err(e) => format!("[LOGISCORE ERROR: Invalid UTF-8 in {}: {}]", name, e),
-                    }
-                }
-                Err(e) => format!("[LOGISCORE ERROR: Decompression failed for {}: {} (data_len: {}, bpt: {})]", name, e, data.len(), header.bytes_per_tick),
+                Ok(decomp) => match String::from_utf8(decomp) {
+                    Ok(s) => s,
+                    Err(e) => format!("[LOGISCORE ERROR: Invalid UTF-8 in {}: {}]", name, e),
+                },
+                Err(e) => format!(
+                    "[LOGISCORE ERROR: Decompression failed for {}: {} (data_len: {}, bpt: {})]",
+                    name,
+                    e,
+                    data.len(),
+                    header.bytes_per_tick
+                ),
             };
-            
-            let extension = format!(".{}", name.split('.').last().unwrap_or(""));
+
+            let extension = format!(".{}", name.split('.').next_back().unwrap_or(""));
             ProjectFile {
                 name,
                 source: res_source,
@@ -247,7 +251,8 @@ fn main() {
 
     #[test]
     fn full_roundtrip_go() {
-        let source = "package main\n\nimport \"fmt\"\n\nfunc main() {\n\tfmt.Println(\"Hello\")\n}\n";
+        let source =
+            "package main\n\nimport \"fmt\"\n\nfunc main() {\n\tfmt.Println(\"Hello\")\n}\n";
         let midi = encode(source, ".go").unwrap();
         let (decoded, _) = decode(&midi).unwrap();
         assert_eq!(source, decoded);
@@ -276,7 +281,9 @@ fn main() {
     #[test]
     fn full_roundtrip_all_extensions() {
         let source = "hello world test data for encoding";
-        for ext in &[".rs", ".py", ".ts", ".go", ".json", ".yaml", ".yml", ".html"] {
+        for ext in &[
+            ".rs", ".py", ".ts", ".go", ".json", ".yaml", ".yml", ".html",
+        ] {
             let midi = encode(source, ext).unwrap();
             let (decoded, _) = decode(&midi).unwrap();
             assert_eq!(source, decoded, "Failed for extension {}", ext);

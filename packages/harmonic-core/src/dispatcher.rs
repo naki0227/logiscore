@@ -1,6 +1,6 @@
 use crate::error::LogiscoreError;
-use crate::protocol::Header;
 use crate::protocol::scales::SCALES;
+use crate::protocol::Header;
 
 /// 拡張子の情報
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -144,7 +144,9 @@ mod tests {
 
     #[test]
     fn header_for_all_extensions() {
-        for ext in &[".rs", ".py", ".ts", ".go", ".json", ".yaml", ".yml", ".tsx", ".html"] {
+        for ext in &[
+            ".rs", ".py", ".ts", ".go", ".json", ".yaml", ".yml", ".tsx", ".html",
+        ] {
             assert!(header_for_extension(ext).is_ok(), "Failed for {}", ext);
         }
     }
