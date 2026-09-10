@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "entries": [
+    {
+      "id": "text-iphone-voice-memos-1m-quiet-001",
+      "status": "planned",
+      "payload": {
+        "type": "text",
+        "text": "Hello from Logiscore.",
+        "sha256": "bd6d791c5fd7623349f54a5988953a5df6f3b457b1523d20d89a5413a2639a1c"
+      },
+      "capture": {
+        "speaker": "MacBook Speaker",
+        "distance_m": 1,
+        "recorder_app": "iPhone Voice Memos",
+        "environment": "quiet",
+        "device_model": null,
+        "recorded_at": null
+      },
+      "recording_file": null,
+      "measurement": null
+    }
+  ]
+}
