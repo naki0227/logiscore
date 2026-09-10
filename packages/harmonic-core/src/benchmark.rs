@@ -1,6 +1,6 @@
 use std::time::Instant;
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use crate::adaptive::{AcousticProfile, AcousticProfileId, Environment};
 use crate::audio::decode_wav;
@@ -15,8 +15,10 @@ const REPORT_SCHEMA_VERSION: u8 = 2;
 
 mod channel;
 mod midi;
+mod regression;
+pub use regression::*;
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct BenchmarkReport {
     pub schema_version: u8,
     pub fixture_bytes: usize,
@@ -24,10 +26,10 @@ pub struct BenchmarkReport {
     pub rows: Vec<BenchmarkRow>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct BenchmarkRow {
     pub name: String,
-    pub transport: &'static str,
+    pub transport: String,
     pub output_bytes: usize,
     pub encode_median_micros: u128,
     pub decode_median_micros: u128,
@@ -212,7 +214,7 @@ struct AudioMeasurement {
 fn audio_row(measurement: AudioMeasurement) -> BenchmarkRow {
     BenchmarkRow {
         name: measurement.name,
-        transport: "WAV",
+        transport: "WAV".to_owned(),
         output_bytes: measurement.output_bytes,
         encode_median_micros: measurement.encode_median_micros,
         decode_median_micros: measurement.decode_median_micros,

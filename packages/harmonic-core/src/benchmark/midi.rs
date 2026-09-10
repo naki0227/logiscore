@@ -36,7 +36,7 @@ fn row(
     let digital_accuracy = if clean_roundtrip { 100.0 } else { 0.0 };
     BenchmarkRow {
         name: name.to_owned(),
-        transport: "MIDI",
+        transport: "MIDI".to_owned(),
         output_bytes,
         encode_median_micros,
         decode_median_micros,
