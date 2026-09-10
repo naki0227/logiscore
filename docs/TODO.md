@@ -13,7 +13,11 @@
     - [完了] Final Recovery Rate / Raw Symbol Accuracy / Corrected Errorsのtelemetry
   - [完了] 32/128/256-byte fixture reportとfunctional regression比較
   - [完了] FixedFallbackのOpus round-trip fixture / Rust・Playwright復元
-  - [未着手] smartphone recording corpus
+  - [進行中] smartphone recording corpus
+    - [完了] manifest schema、収録手順、planned/captured/verified validation
+    - [完了] captured M4Aを自動復元するPlaywrightシナリオ
+    - [未着手] MacBook Speaker→1m→iPhone Voice Memosの実M4A収録
+    - [未着手] 実録音の6共通指標report
 
 ## 未着手
 
