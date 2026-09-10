@@ -160,7 +160,7 @@ fn try_decode_profile(
     )
 }
 
-pub(super) fn decode_profile_packet(
+pub(crate) fn decode_profile_packet(
     samples: &[f32],
     sample_rate: u32,
     profile_id: AcousticProfileId,
