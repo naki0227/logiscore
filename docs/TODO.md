@@ -11,7 +11,7 @@
   - [完了] 全channel reportを6共通指標へ統一
     - [完了] Payload bitrate / Decode time / Playback duration
     - [完了] Final Recovery Rate / Raw Symbol Accuracy / Corrected Errorsのtelemetry
-  - [未着手] fixture size別reportと回帰比較
+  - [完了] 32/128/256-byte fixture reportとfunctional regression比較
   - [完了] FixedFallbackのOpus round-trip fixture / Rust・Playwright復元
   - [未着手] smartphone recording corpus
 
@@ -122,4 +122,4 @@
 
 ## 次回最初に着手するタスク
 
-Phase 9 Benchmarkのfixture size別reportと回帰比較を追加する。最初に `packages/harmonic-core/src/benchmark.rs`、`packages/harmonic-core/src/benchmark/channel.rs`、`docs/benchmarks/2026-09-10-v2-text-128.json` を読む。最初のコマンドは `cargo test --all-targets --all-features --locked` と `npm run test:e2e`。
+実smartphone recording corpusの受入schemaと収録手順を設計する。最初に `docs/logiscore_improvement_design.md` のLevel 4 / v2フィールド検証roadmap、`docs/TODO.md`、`packages/harmonic-core/src/benchmark.rs` を読む。最初のコマンドは `cargo test --all-targets --all-features --locked` と `npm run test:e2e`。

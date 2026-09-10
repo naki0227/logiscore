@@ -90,6 +90,10 @@ Then set the repository Variable `VERCEL_DEPLOY_ENABLED` to `true`. Keep it disa
 cd packages/harmonic-core
 # Arguments: deterministic fixture bytes, median iterations
 cargo run --release --locked --example v2_benchmark -- 128 3
+
+# Compare reports; exits non-zero only for functional recovery regressions
+cargo run --release --locked --example compare_v2_benchmarks -- \
+  ../../docs/benchmarks/2026-09-10-v2-text-128.json current-report.json
 ```
 
 The schema-v2 JSON report compares Dense/Rhythmic MIDI, every acoustic profile, and Secure WAV using Final Recovery Rate, Raw Symbol Accuracy, Corrected Errors, Payload Bitrate, Decode Time, and Playback Duration. It also records output size, configured music weight, FEC profile, and deterministic channel case counts.
