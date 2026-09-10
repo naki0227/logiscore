@@ -92,7 +92,7 @@ cd packages/harmonic-core
 cargo run --release --locked --example v2_benchmark -- 128 3
 ```
 
-The JSON report compares Dense/Rhythmic MIDI, every acoustic profile, and Secure WAV by output size, encode/decode median, playback time, payload bitrate, configured music weight, FEC profile, and deterministic channel recovery.
+The schema-v2 JSON report compares Dense/Rhythmic MIDI, every acoustic profile, and Secure WAV using Final Recovery Rate, Raw Symbol Accuracy, Corrected Errors, Payload Bitrate, Decode Time, and Playback Duration. It also records output size, configured music weight, FEC profile, and deterministic channel case counts.
 
 ## 📄 License
 

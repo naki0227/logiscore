@@ -43,6 +43,17 @@ native codec全体を同じ条件で比較でき、CIや将来の可視化から
 
 Phase 9完了までに、すべてのchannel reportを`Final Recovery Rate / Raw Symbol Accuracy / Corrected Errors / Payload Bitrate / Decode Time / Playback Duration`の6指標へ統一する。現行schemaにないraw symbolおよびFEC correction telemetryはdecoder境界から追加する。
 
+### 6共通指標の定義
+
+- Final Recovery Rate: 全channel caseに対するPayload完全一致数の割合。
+- Raw Symbol Accuracy: 音響decoderがFEC前に復元したpacket bitとclean packet bitの一致率。長さ不一致またはraw packetを返せないcaseは0%とし、失敗caseを除外して過大評価しない。
+- Corrected Errors: raw packetとclean packetの異なるbitのうち、最終Payloadが完全一致したcaseのbit数。RepetitionとHammingを含むend-to-endの訂正効果として数える。
+- Payload Bitrate: canonical payload bit数をPlayback Durationで割った値。
+- Decode Time: 同一入力に対するdecode wall-clockの中央値。
+- Playback Duration: 出力音声sample数とsample rateから求める。
+
+MIDIはPure Digital baselineとしてclean round-trip成功時にFinal RecoveryとRaw Accuracyを100%、Corrected Errorsを0とする。report schema v2で全6指標を必須fieldにする。
+
 ## Opus fixture追記
 
 Opus往復fixtureは、プリエコーで音長境界が変形するrhythmic profileではなく、単音・固定symbol slotの`FixedFallback`を使う。RustでのOpus往復とPlaywrightでのWeb Audio importの両方を確認対象とする。rhythmic profileの損失圧縮対応は別のdecoder改善として追跡する。
