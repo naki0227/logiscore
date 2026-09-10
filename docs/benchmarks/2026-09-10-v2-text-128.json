@@ -1,0 +1,16 @@
+{
+  "fixture_bytes": 128,
+  "iterations": 3,
+  "rows": [
+    {"name":"Dense MIDI","transport":"MIDI","output_bytes":1006,"encode_median_micros":45,"decode_median_micros":19,"playback_ms":null,"payload_bitrate_bps":null,"clean_roundtrip":true,"music_weight":null,"max_polyphony":null,"fec_profile":null,"channel_successes":null,"channel_cases":null},
+    {"name":"Rhythmic MIDI","transport":"MIDI","output_bytes":4501,"encode_median_micros":1661,"decode_median_micros":1670,"playback_ms":null,"payload_bitrate_bps":null,"clean_roundtrip":true,"music_weight":null,"max_polyphony":null,"fec_profile":null,"channel_successes":null,"channel_cases":null},
+    {"name":"Quiet","transport":"WAV","output_bytes":321644,"encode_median_micros":3763,"decode_median_micros":22666,"playback_ms":20100,"payload_bitrate_bps":50.9452736318408,"clean_roundtrip":true,"music_weight":85,"max_polyphony":4,"fec_profile":0,"channel_successes":2,"channel_cases":5},
+    {"name":"Balanced","transport":"WAV","output_bytes":1911084,"encode_median_micros":9544,"decode_median_micros":128611,"playback_ms":119440,"payload_bitrate_bps":8.573342263898192,"clean_roundtrip":true,"music_weight":60,"max_polyphony":4,"fec_profile":1,"channel_successes":2,"channel_cases":5},
+    {"name":"Conversation","transport":"WAV","output_bytes":2390444,"encode_median_micros":10833,"decode_median_micros":162828,"playback_ms":149400,"payload_bitrate_bps":6.854082998661312,"clean_roundtrip":true,"music_weight":45,"max_polyphony":4,"fec_profile":2,"channel_successes":2,"channel_cases":5},
+    {"name":"Noisy","transport":"WAV","output_bytes":4753964,"encode_median_micros":22065,"decode_median_micros":323078,"playback_ms":297120,"payload_bitrate_bps":3.4464189553042544,"clean_roundtrip":true,"music_weight":30,"max_polyphony":4,"fec_profile":3,"channel_successes":2,"channel_cases":5},
+    {"name":"Online","transport":"WAV","output_bytes":4753964,"encode_median_micros":21179,"decode_median_micros":641612,"playback_ms":297120,"payload_bitrate_bps":3.4464189553042544,"clean_roundtrip":true,"music_weight":25,"max_polyphony":4,"fec_profile":3,"channel_successes":2,"channel_cases":5},
+    {"name":"LongDistance","transport":"WAV","output_bytes":5546284,"encode_median_micros":24099,"decode_median_micros":382901,"playback_ms":346640,"payload_bitrate_bps":2.954073390260789,"clean_roundtrip":true,"music_weight":20,"max_polyphony":4,"fec_profile":3,"channel_successes":2,"channel_cases":5},
+    {"name":"FixedFallback","transport":"WAV","output_bytes":6181164,"encode_median_micros":6131,"decode_median_micros":66275,"playback_ms":386320,"payload_bitrate_bps":2.65065230896666,"clean_roundtrip":true,"music_weight":0,"max_polyphony":1,"fec_profile":3,"channel_successes":2,"channel_cases":5},
+    {"name":"Secure Balanced","transport":"WAV","output_bytes":2928684,"encode_median_micros":75094,"decode_median_micros":261834,"playback_ms":183040,"payload_bitrate_bps":5.594405594405594,"clean_roundtrip":true,"music_weight":60,"max_polyphony":4,"fec_profile":1,"channel_successes":2,"channel_cases":5}
+  ]
+}

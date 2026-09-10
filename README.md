@@ -84,6 +84,16 @@ The GitHub Actions `Vercel production` job runs only after both Rust and Web job
 
 Then set the repository Variable `VERCEL_DEPLOY_ENABLED` to `true`. Keep it disabled while Vercel Git Integration is active to avoid duplicate deployments.
 
+### v2 benchmark
+
+```bash
+cd packages/harmonic-core
+# Arguments: deterministic fixture bytes, median iterations
+cargo run --release --locked --example v2_benchmark -- 128 3
+```
+
+The JSON report compares Dense/Rhythmic MIDI, every acoustic profile, and Secure WAV by output size, encode/decode median, playback time, payload bitrate, configured music weight, FEC profile, and deterministic channel recovery.
+
 ## 📄 License
 
 MIT

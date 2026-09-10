@@ -5,6 +5,12 @@
 ## 進行中
 
 - [進行中] v2 Phase 9: Benchmark
+  - [完了] 決定論的fixtureとJSON report schema
+  - [完了] Dense / Rhythmic / 全Acoustic profile / Secureの速度・size・bitrate計測
+  - [完了] 5段階の決定論的channel recovery計測
+  - [未着手] fixture size別reportと回帰比較
+  - [未着手] Opus round-trip fixture
+  - [未着手] smartphone recording corpus
 
 ## 未着手
 

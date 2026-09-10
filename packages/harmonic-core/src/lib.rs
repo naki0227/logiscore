@@ -1,5 +1,6 @@
 pub mod adaptive;
 pub mod audio;
+pub mod benchmark;
 pub mod compressor;
 mod density;
 pub mod dispatcher;
