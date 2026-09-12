@@ -81,6 +81,17 @@ pub fn decode_text_v2_recorded_pcm_adaptive_wasm(
 }
 
 #[wasm_bindgen]
+pub fn analyze_text_v2_recorded_pcm_wasm(
+    samples: &[f32],
+    sample_rate: u32,
+    expected_text: &str,
+) -> Result<String, JsValue> {
+    let telemetry = crate::benchmark::analyze_text_recording(samples, sample_rate, expected_text)
+        .map_err(js_error)?;
+    serde_json::to_string(&telemetry).map_err(|error| JsValue::from_str(&error.to_string()))
+}
+
+#[wasm_bindgen]
 pub fn encode_source_file_v2_wav_adaptive_wasm(
     filename: &str,
     extension: &str,

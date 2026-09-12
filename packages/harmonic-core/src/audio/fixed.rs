@@ -10,6 +10,8 @@ use crate::error::LogiscoreError;
 const SYMBOL_TONE_MS: u32 = 80;
 const SYMBOL_REST_MS: u32 = 40;
 const FIRST_SYMBOL_NOTE: u8 = 60;
+const MIN_SYNC_TONE_ENERGY: f32 = 0.0001;
+const MIN_SYMBOL_TONE_ENERGY: f32 = 0.00000001;
 
 #[derive(Debug, Clone, Copy)]
 pub struct FixedPcmCodec {
@@ -148,7 +150,7 @@ impl FixedPcmCodec {
             midi_frequency(alternate),
             self.profile.sample_rate(),
         );
-        if expected_energy < 0.01 || expected_energy < alternate_energy * 2.0 {
+        if expected_energy < MIN_SYNC_TONE_ENERGY || expected_energy < alternate_energy * 2.0 {
             return Err(invalid_audio("invalid fixed synchronization tone"));
         }
         Ok(())
@@ -192,7 +194,7 @@ impl FixedPcmCodec {
                 )
             })
             .max_by(|left, right| left.0.total_cmp(&right.0))
-            .filter(|(energy, _)| *energy > 0.01)
+            .filter(|(energy, _)| *energy > MIN_SYMBOL_TONE_ENERGY)
             .map(|(_, nibble)| nibble)
             .ok_or_else(|| invalid_audio("fixed symbol was not detected"))
     }
@@ -233,5 +235,36 @@ mod tests {
         let mut samples = vec![0.0; 317];
         samples.extend(codec.encode(b"fixed fallback").unwrap());
         assert_eq!(codec.decode(&samples).unwrap(), b"fixed fallback");
+    }
+
+    #[test]
+    fn fixed_codec_roundtrips_quiet_air_like_signal() {
+        let profile = PcmProfile::with_timing_percent(200).unwrap();
+        let codec = FixedPcmCodec::new(profile);
+        let samples = codec
+            .encode(b"quiet fixed fallback")
+            .unwrap()
+            .into_iter()
+            .map(|sample| sample * 0.1)
+            .collect::<Vec<_>>();
+        assert_eq!(codec.decode(&samples).unwrap(), b"quiet fixed fallback");
+    }
+
+    #[test]
+    fn fixed_codec_accepts_weak_payload_symbols_after_strong_framing() {
+        let profile = PcmProfile::with_timing_percent(200).unwrap();
+        let codec = FixedPcmCodec::new(profile);
+        let payload_start_ms = LEADING_SILENCE_MS
+            + SYNC_TONE_MS * 2
+            + SYNC_GAP_MS
+            + AFTER_SYNC_MS
+            + HEADER_BIT_MS * 32
+            + AFTER_HEADER_MS;
+        let payload_start = profile.samples_for_ms(payload_start_ms);
+        let mut samples = codec.encode(b"weak payload").unwrap();
+        for sample in &mut samples[payload_start..] {
+            *sample *= 0.001;
+        }
+        assert_eq!(codec.decode(&samples).unwrap(), b"weak payload");
     }
 }

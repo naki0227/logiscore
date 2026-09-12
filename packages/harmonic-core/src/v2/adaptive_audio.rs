@@ -106,7 +106,7 @@ fn encode_wav_payload(
     })
 }
 
-fn build_profile_packet(
+pub(crate) fn build_profile_packet(
     payload_type: PayloadType,
     canonical_payload: &[u8],
     profile: AcousticProfile,

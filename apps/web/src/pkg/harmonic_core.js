@@ -1,6 +1,35 @@
 /* @ts-self-types="./harmonic_core.d.ts" */
 
 /**
+ * @param {Float32Array} samples
+ * @param {number} sample_rate
+ * @param {string} expected_text
+ * @returns {string}
+ */
+export function analyze_text_v2_recorded_pcm_wasm(samples, sample_rate, expected_text) {
+    let deferred4_0;
+    let deferred4_1;
+    try {
+        const ptr0 = passArrayF32ToWasm0(samples, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passStringToWasm0(expected_text, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len1 = WASM_VECTOR_LEN;
+        const ret = wasm.analyze_text_v2_recorded_pcm_wasm(ptr0, len0, sample_rate, ptr1, len1);
+        var ptr3 = ret[0];
+        var len3 = ret[1];
+        if (ret[3]) {
+            ptr3 = 0; len3 = 0;
+            throw takeFromExternrefTable0(ret[2]);
+        }
+        deferred4_0 = ptr3;
+        deferred4_1 = len3;
+        return getStringFromWasm0(ptr3, len3);
+    } finally {
+        wasm.__wbindgen_free(deferred4_0, deferred4_1, 1);
+    }
+}
+
+/**
  * CRC/FEC付きPCMからv2 Project Payloadを復元する。
  * @param {Float32Array} samples
  * @returns {string}

@@ -51,7 +51,7 @@ fn summarize(
             .raw_packet
             .filter(|packet| packet.len() == expected_packet.len())
         {
-            let bit_errors = bit_errors(expected_packet, &packet);
+            let bit_errors = packet_bit_errors(expected_packet, &packet);
             correct_symbols += expected_packet.len() * 8 - bit_errors;
             if observation.final_recovery {
                 corrected_errors += bit_errors;
@@ -72,7 +72,7 @@ fn summarize(
     }
 }
 
-fn bit_errors(expected: &[u8], actual: &[u8]) -> usize {
+pub(super) fn packet_bit_errors(expected: &[u8], actual: &[u8]) -> usize {
     expected
         .iter()
         .zip(actual)
@@ -116,8 +116,8 @@ mod tests {
 
     #[test]
     fn counts_packet_bit_errors() {
-        assert_eq!(bit_errors(&[0b1010_1010], &[0b1010_0011]), 2);
-        assert_eq!(bit_errors(&[0xff, 0], &[0xff, 0]), 0);
+        assert_eq!(packet_bit_errors(&[0b1010_1010], &[0b1010_0011]), 2);
+        assert_eq!(packet_bit_errors(&[0xff, 0], &[0xff, 0]), 0);
     }
 
     #[test]

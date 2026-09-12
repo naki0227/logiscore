@@ -15,7 +15,9 @@ const REPORT_SCHEMA_VERSION: u8 = 2;
 
 mod channel;
 mod midi;
+mod recording;
 mod regression;
+pub use recording::*;
 pub use regression::*;
 
 #[derive(Debug, Deserialize, Serialize)]

@@ -1,6 +1,8 @@
 /* tslint:disable */
 /* eslint-disable */
 
+export function analyze_text_v2_recorded_pcm_wasm(samples: Float32Array, sample_rate: number, expected_text: string): string;
+
 /**
  * CRC/FEC付きPCMからv2 Project Payloadを復元する。
  */
@@ -206,16 +208,21 @@ export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembl
 
 export interface InitOutput {
     readonly memory: WebAssembly.Memory;
-    readonly decode_project_v2_recorded_pcm_adaptive_wasm: (a: number, b: number, c: number) => [number, number, number, number];
-    readonly decode_project_v2_wav_adaptive_wasm: (a: number, b: number) => [number, number, number, number];
-    readonly decode_source_file_v2_recorded_pcm_adaptive_wasm: (a: number, b: number, c: number) => [number, number, number, number];
-    readonly decode_source_file_v2_wav_adaptive_wasm: (a: number, b: number) => [number, number, number, number];
-    readonly decode_text_v2_recorded_pcm_adaptive_wasm: (a: number, b: number, c: number) => [number, number, number, number];
-    readonly decode_text_v2_wav_adaptive_wasm: (a: number, b: number) => [number, number, number, number];
-    readonly describe_acoustic_profile_wasm: (a: number, b: number, c: number, d: number) => [number, number, number, number];
-    readonly encode_project_v2_wav_adaptive_wasm: (a: number, b: number, c: number, d: number, e: number) => [number, number, number, number];
-    readonly encode_source_file_v2_wav_adaptive_wasm: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number) => [number, number, number, number];
-    readonly encode_text_v2_wav_adaptive_wasm: (a: number, b: number, c: number, d: number, e: number) => [number, number, number, number];
+    readonly decode_project_v2_recorded_pcm_wasm: (a: number, b: number, c: number) => [number, number, number, number];
+    readonly decode_project_v2_wav_reliable_wasm: (a: number, b: number) => [number, number, number, number];
+    readonly decode_project_wasm: (a: number, b: number) => [number, number, number];
+    readonly decode_source_file_v2_recorded_pcm_wasm: (a: number, b: number, c: number) => [number, number, number, number];
+    readonly decode_source_file_v2_wav_reliable_wasm: (a: number, b: number) => [number, number, number, number];
+    readonly decode_text_v2_recorded_pcm_wasm: (a: number, b: number, c: number) => [number, number, number, number];
+    readonly decode_text_v2_wav_reliable_wasm: (a: number, b: number) => [number, number, number, number];
+    readonly decode_wasm: (a: number, b: number) => [number, number, number, number];
+    readonly encode_project_v2_wav_reliable_wasm: (a: number, b: number) => [number, number, number, number];
+    readonly encode_project_wasm: (a: number, b: number) => [number, number, number, number];
+    readonly encode_source_file_v2_wav_reliable_wasm: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number, number, number];
+    readonly encode_text_v2_wav_reliable_wasm: (a: number, b: number) => [number, number, number, number];
+    readonly encode_wasm: (a: number, b: number, c: number, d: number) => [number, number, number, number];
+    readonly get_extension_info: (a: number, b: number) => [number, number];
+    readonly get_version: () => [number, number];
     readonly decode_project_v2_recorded_pcm_secure_wasm: (a: number, b: number, c: number, d: number, e: number) => [number, number, number, number];
     readonly decode_project_v2_wav_secure_wasm: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly decode_source_file_v2_recorded_pcm_secure_wasm: (a: number, b: number, c: number, d: number, e: number) => [number, number, number, number];
@@ -227,6 +234,17 @@ export interface InitOutput {
     readonly encode_project_v2_wav_secure_wasm: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => [number, number, number, number];
     readonly encode_source_file_v2_wav_secure_wasm: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number) => [number, number, number, number];
     readonly encode_text_v2_wav_secure_wasm: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => [number, number, number, number];
+    readonly analyze_text_v2_recorded_pcm_wasm: (a: number, b: number, c: number, d: number, e: number) => [number, number, number, number];
+    readonly decode_project_v2_recorded_pcm_adaptive_wasm: (a: number, b: number, c: number) => [number, number, number, number];
+    readonly decode_project_v2_wav_adaptive_wasm: (a: number, b: number) => [number, number, number, number];
+    readonly decode_source_file_v2_recorded_pcm_adaptive_wasm: (a: number, b: number, c: number) => [number, number, number, number];
+    readonly decode_source_file_v2_wav_adaptive_wasm: (a: number, b: number) => [number, number, number, number];
+    readonly decode_text_v2_recorded_pcm_adaptive_wasm: (a: number, b: number, c: number) => [number, number, number, number];
+    readonly decode_text_v2_wav_adaptive_wasm: (a: number, b: number) => [number, number, number, number];
+    readonly describe_acoustic_profile_wasm: (a: number, b: number, c: number, d: number) => [number, number, number, number];
+    readonly encode_project_v2_wav_adaptive_wasm: (a: number, b: number, c: number, d: number, e: number) => [number, number, number, number];
+    readonly encode_source_file_v2_wav_adaptive_wasm: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number) => [number, number, number, number];
+    readonly encode_text_v2_wav_adaptive_wasm: (a: number, b: number, c: number, d: number, e: number) => [number, number, number, number];
     readonly decode_project_v2_pcm_reliable_wasm: (a: number, b: number) => [number, number, number, number];
     readonly decode_project_v2_pcm_wasm: (a: number, b: number) => [number, number, number, number];
     readonly decode_project_v2_wasm: (a: number, b: number) => [number, number, number, number];
@@ -250,28 +268,13 @@ export interface InitOutput {
     readonly encode_text_v2_wasm: (a: number, b: number) => [number, number, number, number];
     readonly get_pcm_sample_rate: () => number;
     readonly get_v2_version: () => number;
-    readonly decode_project_v2_recorded_pcm_wasm: (a: number, b: number, c: number) => [number, number, number, number];
-    readonly decode_project_v2_wav_reliable_wasm: (a: number, b: number) => [number, number, number, number];
-    readonly decode_source_file_v2_recorded_pcm_wasm: (a: number, b: number, c: number) => [number, number, number, number];
-    readonly decode_source_file_v2_wav_reliable_wasm: (a: number, b: number) => [number, number, number, number];
-    readonly decode_text_v2_recorded_pcm_wasm: (a: number, b: number, c: number) => [number, number, number, number];
-    readonly decode_text_v2_wav_reliable_wasm: (a: number, b: number) => [number, number, number, number];
-    readonly encode_project_v2_wav_reliable_wasm: (a: number, b: number) => [number, number, number, number];
-    readonly encode_source_file_v2_wav_reliable_wasm: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number, number, number];
-    readonly encode_text_v2_wav_reliable_wasm: (a: number, b: number) => [number, number, number, number];
-    readonly decode_project_wasm: (a: number, b: number) => [number, number, number];
-    readonly decode_wasm: (a: number, b: number) => [number, number, number, number];
-    readonly encode_project_wasm: (a: number, b: number) => [number, number, number, number];
-    readonly encode_wasm: (a: number, b: number, c: number, d: number) => [number, number, number, number];
-    readonly get_extension_info: (a: number, b: number) => [number, number];
-    readonly get_version: () => [number, number];
     readonly __wbindgen_exn_store: (a: number) => void;
     readonly __externref_table_alloc: () => number;
     readonly __wbindgen_externrefs: WebAssembly.Table;
     readonly __wbindgen_malloc: (a: number, b: number) => number;
+    readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
     readonly __externref_table_dealloc: (a: number) => void;
     readonly __wbindgen_free: (a: number, b: number, c: number) => void;
-    readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
     readonly __wbindgen_start: () => void;
 }
 
