@@ -518,6 +518,32 @@ export function decode_source_file_v2_wav_secure_wasm(bytes, password) {
 }
 
 /**
+ * @param {Float32Array} samples
+ * @param {number} sample_rate
+ * @returns {string}
+ */
+export function decode_text_v2_checkpoint_loop_pcm_wasm(samples, sample_rate) {
+    let deferred3_0;
+    let deferred3_1;
+    try {
+        const ptr0 = passArrayF32ToWasm0(samples, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.decode_text_v2_checkpoint_loop_pcm_wasm(ptr0, len0, sample_rate);
+        var ptr2 = ret[0];
+        var len2 = ret[1];
+        if (ret[3]) {
+            ptr2 = 0; len2 = 0;
+            throw takeFromExternrefTable0(ret[2]);
+        }
+        deferred3_0 = ptr2;
+        deferred3_1 = len2;
+        return getStringFromWasm0(ptr2, len2);
+    } finally {
+        wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
+    }
+}
+
+/**
  * CRC/FEC付きPCMからv2 Text Payloadを復元する。
  * @param {Float32Array} samples
  * @returns {string}
@@ -1177,6 +1203,24 @@ export function encode_source_file_v2_wav_secure_wasm(filename, extension, sourc
     var v6 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
     wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
     return v6;
+}
+
+/**
+ * @param {string} text
+ * @param {number} chunk_payload_bytes
+ * @param {number} loops
+ * @returns {Float32Array}
+ */
+export function encode_text_v2_checkpoint_loop_pcm_wasm(text, chunk_payload_bytes, loops) {
+    const ptr0 = passStringToWasm0(text, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.encode_text_v2_checkpoint_loop_pcm_wasm(ptr0, len0, chunk_payload_bytes, loops);
+    if (ret[3]) {
+        throw takeFromExternrefTable0(ret[2]);
+    }
+    var v2 = getArrayF32FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
+    return v2;
 }
 
 /**

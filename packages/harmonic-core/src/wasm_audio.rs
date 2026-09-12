@@ -27,6 +27,27 @@ pub fn decode_text_v2_recorded_pcm_wasm(
 }
 
 #[wasm_bindgen]
+pub fn encode_text_v2_checkpoint_loop_pcm_wasm(
+    text: &str,
+    chunk_payload_bytes: u32,
+    loops: u32,
+) -> Result<Vec<f32>, JsValue> {
+    let chunk_payload_bytes = usize::try_from(chunk_payload_bytes)
+        .map_err(|_| JsValue::from_str("checkpoint chunk size is invalid"))?;
+    let loops = usize::try_from(loops)
+        .map_err(|_| JsValue::from_str("checkpoint loop count is invalid"))?;
+    v2::checkpoint::encode_text_checkpoint_loop(text, chunk_payload_bytes, loops).map_err(js_error)
+}
+
+#[wasm_bindgen]
+pub fn decode_text_v2_checkpoint_loop_pcm_wasm(
+    samples: &[f32],
+    sample_rate: u32,
+) -> Result<String, JsValue> {
+    v2::checkpoint::decode_text_checkpoint_loop_recording(samples, sample_rate).map_err(js_error)
+}
+
+#[wasm_bindgen]
 pub fn encode_source_file_v2_wav_reliable_wasm(
     filename: &str,
     extension: &str,

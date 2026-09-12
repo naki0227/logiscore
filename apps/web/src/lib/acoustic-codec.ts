@@ -1,5 +1,6 @@
 import {
   analyze_text_v2_recorded_pcm_wasm,
+  decode_text_v2_checkpoint_loop_pcm_wasm,
   decode_project_v2_recorded_pcm_adaptive_wasm,
   decode_project_v2_wav_adaptive_wasm,
   decode_source_file_v2_recorded_pcm_adaptive_wasm,
@@ -10,6 +11,7 @@ import {
   encode_project_v2_wav_adaptive_wasm,
   encode_source_file_v2_wav_adaptive_wasm,
   encode_text_v2_wav_adaptive_wasm,
+  encode_text_v2_checkpoint_loop_pcm_wasm,
 } from "../pkg/harmonic_core.js";
 import {
   parseCoreRecordingTelemetry,
@@ -65,6 +67,25 @@ export function analyzeTextV2RecordedPcm(
   return parseCoreRecordingTelemetry(
     analyze_text_v2_recorded_pcm_wasm(samples, sampleRate, expectedText),
   );
+}
+
+export function encodeTextV2CheckpointLoopPcm(
+  text: string,
+  chunkPayloadBytes: number,
+  loops: number,
+): Float32Array {
+  return encode_text_v2_checkpoint_loop_pcm_wasm(
+    text,
+    chunkPayloadBytes,
+    loops,
+  );
+}
+
+export function decodeTextV2CheckpointLoopPcm(
+  samples: Float32Array,
+  sampleRate: number,
+): string {
+  return decode_text_v2_checkpoint_loop_pcm_wasm(samples, sampleRate);
 }
 
 export function encodeSourceFileV2WavReliable(
