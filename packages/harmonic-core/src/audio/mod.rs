@@ -2,6 +2,7 @@ mod channel;
 mod decode;
 mod fixed;
 mod fixed_scan;
+mod mini;
 mod profile;
 mod resample;
 mod synth;
@@ -9,6 +10,7 @@ mod wav;
 
 pub use channel::ChannelModel;
 pub use fixed::FixedPcmCodec;
+pub(crate) use mini::MiniFixedPcmCodec;
 pub use profile::PcmProfile;
 pub use wav::{decode_wav, encode_wav, PcmAudio};
 

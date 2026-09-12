@@ -5,7 +5,7 @@ use super::{
     CheckpointChunk,
 };
 use crate::adaptive::{AcousticProfile, AcousticProfileId};
-use crate::audio::{FixedPcmCodec, PcmProfile};
+use crate::audio::{FixedPcmCodec, MiniFixedPcmCodec, PcmProfile};
 use crate::error::LogiscoreError;
 use crate::payload::{PayloadType, TextPayload};
 use crate::v2::adaptive_audio::build_profile_packet;
@@ -26,7 +26,7 @@ pub fn encode_checkpoint_loop(
     }
     let profile = AcousticProfile::for_id(AcousticProfileId::FixedFallback);
     let pcm_profile = PcmProfile::with_timing_percent(profile.timing_percent)?;
-    let codec = FixedPcmCodec::new(pcm_profile);
+    let codec = MiniFixedPcmCodec::new(pcm_profile);
     let chunks = split_checkpoint_packet(packet, chunk_payload_bytes)?;
     let mut encoded_chunks = Vec::with_capacity(chunks.len());
     let mut loop_samples = 0usize;
@@ -56,8 +56,12 @@ pub fn decode_checkpoint_loop_recording(
 ) -> Result<Vec<u8>, LogiscoreError> {
     let profile = AcousticProfile::for_id(AcousticProfileId::FixedFallback);
     let pcm_profile = PcmProfile::with_timing_percent(profile.timing_percent)?;
-    let packets =
-        FixedPcmCodec::new(pcm_profile).decode_all_at_sample_rate(samples, sample_rate)?;
+    let mut packets =
+        MiniFixedPcmCodec::new(pcm_profile).decode_all_at_sample_rate(samples, sample_rate)?;
+    if packets.is_empty() {
+        packets =
+            FixedPcmCodec::new(pcm_profile).decode_all_at_sample_rate(samples, sample_rate)?;
+    }
     let mut transfers = BTreeMap::<(u32, u16, u32), Vec<CheckpointChunk>>::new();
     for packet in packets {
         if let Ok(chunk) = decode_checkpoint_chunk(&packet) {
@@ -151,6 +155,22 @@ mod tests {
         assert_eq!(
             decode_text_checkpoint_loop_recording(&recording, 8_000).unwrap(),
             text
+        );
+    }
+
+    #[test]
+    fn decoder_accepts_legacy_full_sync_checkpoint_audio() {
+        let packet = b"legacy checkpoint framing";
+        let profile = AcousticProfile::for_id(AcousticProfileId::FixedFallback);
+        let pcm_profile = PcmProfile::with_timing_percent(profile.timing_percent).unwrap();
+        let codec = FixedPcmCodec::new(pcm_profile);
+        let mut recording = Vec::new();
+        for chunk in split_checkpoint_packet(packet, 16).unwrap() {
+            recording.extend(codec.encode(&chunk.encode().unwrap()).unwrap());
+        }
+        assert_eq!(
+            decode_checkpoint_loop_recording(&recording, 8_000).unwrap(),
+            packet
         );
     }
 }

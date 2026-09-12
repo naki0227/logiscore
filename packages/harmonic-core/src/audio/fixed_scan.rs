@@ -30,7 +30,7 @@ impl FixedPcmCodec {
     }
 }
 
-fn checkpoint_onsets(samples: &[f32], profile: PcmProfile) -> Vec<usize> {
+pub(super) fn checkpoint_onsets(samples: &[f32], profile: PcmProfile) -> Vec<usize> {
     const ONSET_THRESHOLD: f32 = 0.02;
     const QUIET_RUN_MS: u32 = 10;
 
