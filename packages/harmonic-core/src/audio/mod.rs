@@ -1,6 +1,7 @@
 mod channel;
 mod decode;
 mod fixed;
+mod fixed_scan;
 mod profile;
 mod resample;
 mod synth;

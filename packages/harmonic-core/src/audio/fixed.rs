@@ -15,7 +15,7 @@ const MIN_SYMBOL_TONE_ENERGY: f32 = 0.00000001;
 
 #[derive(Debug, Clone, Copy)]
 pub struct FixedPcmCodec {
-    profile: PcmProfile,
+    pub(super) profile: PcmProfile,
 }
 
 impl FixedPcmCodec {
@@ -60,11 +60,18 @@ impl FixedPcmCodec {
     }
 
     pub fn decode(self, samples: &[f32]) -> Result<Vec<u8>, LogiscoreError> {
-        if samples.len() > MAX_PCM_SAMPLES || samples.iter().any(|sample| !sample.is_finite()) {
-            return Err(invalid_audio("fixed PCM input is invalid or too large"));
-        }
+        validate_samples(samples)?;
         let sync_start =
             find_onset(samples, 0).ok_or_else(|| invalid_audio("preamble not found"))?;
+        self.decode_from_sync(samples, sync_start)
+            .map(|(packet, _)| packet)
+    }
+
+    pub(super) fn decode_from_sync(
+        self,
+        samples: &[f32],
+        sync_start: usize,
+    ) -> Result<(Vec<u8>, usize), LogiscoreError> {
         self.verify_sync(samples, sync_start)?;
         let header_start = sync_start
             + self
@@ -86,7 +93,7 @@ impl FixedPcmCodec {
             cursor = cursor.saturating_add(stride);
             packet.push((high << 4) | low);
         }
-        Ok(packet)
+        Ok((packet, cursor))
     }
 
     fn append_framing(self, samples: &mut Vec<f32>, packet_length: usize) {
@@ -222,6 +229,13 @@ impl FixedPcmCodec {
             .checked_add(packet_length.saturating_mul(2).saturating_mul(symbol))
             .ok_or_else(|| invalid_audio("fixed PCM size overflow"))
     }
+}
+
+pub(super) fn validate_samples(samples: &[f32]) -> Result<(), LogiscoreError> {
+    if samples.len() > MAX_PCM_SAMPLES || samples.iter().any(|sample| !sample.is_finite()) {
+        return Err(invalid_audio("fixed PCM input is invalid or too large"));
+    }
+    Ok(())
 }
 
 #[cfg(test)]
