@@ -65,10 +65,18 @@ checkpoint loop PCMのencodeはMini Syncへ切り替わる。decodeはMini Sync�
 
 - `cargo fmt --all -- --check`: 成功。
 - `cargo clippy --all-targets --all-features --locked -- -D warnings`: 成功。
-- `cargo test --all-targets --all-features --locked v2::checkpoint`: 13件成功。
+- `cargo test --all-targets --all-features --locked`: 197件成功。
+- `cargo check --all-targets --all-features --locked`: 成功。
+- `cargo build --all-targets --all-features --locked`: 成功。
+- `cargo audit`: 126 dependenciesを検査しadvisoryなし。
 - `wasm-pack build . --target web --out-dir ../../apps/web/src/pkg`: 成功。
-- `npm run typecheck:e2e`: 成功。
-- `npm run test:e2e -- checkpoint-loop.spec.ts`: Playwright Chromium 3件成功。
+- `npm run typecheck` / `npm run typecheck:e2e`: 成功。
+- `npm run format:check` / `npm run lint`: 成功。
+- `npm test`: Vitest 44件成功。
+- `npm run build`: 成功。JS bundle 706.82 kBの既知warningあり。
+- `npm audit --audit-level=high`: 0 vulnerabilities。
+- `npm run test:e2e`: Playwright Chromium全28件成功。
+- k6 static delivery: 642/642 checks、HTTP failure 0%、p95 12.64 ms。
 
 ## CIで確認される内容
 
