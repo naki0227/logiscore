@@ -29,7 +29,11 @@
   - [完了] TextをFixedFallbackで完全復元
   - [未着手] Source File実録音
   - [未着手] Project実録音
-- [未着手] v2 field validation 3: 任意位置・ループ録音のchunk/checkpoint protocol
+- [進行中] v2 field validation 3: 任意位置・ループ録音のchunk/checkpoint protocol
+  - [完了] checkpoint envelopeと互換境界のADR
+  - [進行中] chunk CRC・順序再構成・重複観測voteのdomain実装
+  - [未着手] 音響Mini Sync生成と録音途中のpreamble探索
+  - [未着手] 2周以上の録音を統合するPlaywright scenario
 - [未着手] v2 field validation 4: 会話・TV・音楽・Café・残響の実環境matrix
 - [未着手] v2 field validation 5: PCM/Opus/AAC/MP3/resampling codec matrix
 - [未着手] v2 field validation 6: WebRTC後にGoogle Meet通信
