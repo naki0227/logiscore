@@ -31,9 +31,11 @@
   - [未着手] Project実録音
 - [進行中] v2 field validation 3: 任意位置・ループ録音のchunk/checkpoint protocol
   - [完了] checkpoint envelopeと互換境界のADR
-  - [進行中] chunk CRC・順序再構成・重複観測voteのdomain実装
-  - [未着手] 音響Mini Sync生成と録音途中のpreamble探索
-  - [未着手] 2周以上の録音を統合するPlaywright scenario
+  - [完了] chunk CRC・順序再構成・重複観測hard voteのdomain実装
+  - [完了] 既存同期点を録音全体から探索する任意開始位置decoder
+  - [完了] clean 2周録音を統合するPlaywright scenario
+  - [未着手] 音響Mini Syncによるcheckpoint overhead短縮
+  - [未着手] symbol confidenceを使う破損観測のsoft combine
 - [未着手] v2 field validation 4: 会話・TV・音楽・Café・残響の実環境matrix
 - [未着手] v2 field validation 5: PCM/Opus/AAC/MP3/resampling codec matrix
 - [未着手] v2 field validation 6: WebRTC後にGoogle Meet通信
