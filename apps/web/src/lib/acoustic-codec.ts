@@ -1,4 +1,5 @@
 import {
+  analyze_text_v2_recorded_pcm_wasm,
   decode_project_v2_recorded_pcm_adaptive_wasm,
   decode_project_v2_wav_adaptive_wasm,
   decode_source_file_v2_recorded_pcm_adaptive_wasm,
@@ -10,6 +11,10 @@ import {
   encode_source_file_v2_wav_adaptive_wasm,
   encode_text_v2_wav_adaptive_wasm,
 } from "../pkg/harmonic_core.js";
+import {
+  parseCoreRecordingTelemetry,
+  type CoreRecordingTelemetry,
+} from "../features/audio/recordingMetricsModel";
 import {
   parseProfileDescription,
   type AcousticProfileDescription,
@@ -50,6 +55,16 @@ export function decodeTextV2RecordedPcm(
   sampleRate: number,
 ): string {
   return decode_text_v2_recorded_pcm_adaptive_wasm(samples, sampleRate);
+}
+
+export function analyzeTextV2RecordedPcm(
+  samples: Float32Array,
+  sampleRate: number,
+  expectedText: string,
+): CoreRecordingTelemetry {
+  return parseCoreRecordingTelemetry(
+    analyze_text_v2_recorded_pcm_wasm(samples, sampleRate, expectedText),
+  );
 }
 
 export function encodeSourceFileV2WavReliable(
