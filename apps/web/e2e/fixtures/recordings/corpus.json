@@ -3,7 +3,7 @@
   "entries": [
     {
       "id": "text-iphone-voice-memos-1m-quiet-001",
-      "status": "planned",
+      "status": "verified",
       "payload": {
         "type": "text",
         "text": "Hello from Logiscore.",
@@ -14,11 +14,20 @@
         "distance_m": 1,
         "recorder_app": "iPhone Voice Memos",
         "environment": "quiet",
-        "device_model": null,
-        "recorded_at": null
+        "transmission_file": "capture-text-fixed-fallback.wav",
+        "device_model": "iPhone (model unspecified)",
+        "recorded_at": "2026-09-10T22:09:47+09:00"
       },
-      "recording_file": null,
-      "measurement": null
+      "recording_file": "iphone-record-1m-quiet-001.m4a",
+      "recording_sha256": "d5b538e4d750e803b2795c6555f6b43b97d61e2266e2bb49510db7cb2b0c6df6",
+      "measurement": {
+        "final_recovery_rate_percent": 100,
+        "raw_symbol_accuracy_percent": 99.86462093862816,
+        "corrected_errors": 3,
+        "payload_bitrate_bps": 1.2024851359476252,
+        "decode_time_micros": 57500,
+        "playback_duration_ms": 139710.66666666666
+      }
     }
   ]
 }

@@ -16,9 +16,11 @@ export interface RecordingEntry {
   distanceM: number;
   recorderApp: string;
   environment: string;
+  transmissionFile: string;
   deviceModel: string | null;
   recordedAt: string | null;
   recordingFile: string | null;
+  recordingSha256: string | null;
   measurement: RecordingMeasurement | null;
 }
 
@@ -75,9 +77,17 @@ function parseEntry(input: unknown): RecordingEntry {
     distanceM: positiveNumber(capture.distance_m, "capture.distance_m"),
     recorderApp: string(capture.recorder_app, "capture.recorder_app"),
     environment: string(capture.environment, "capture.environment"),
+    transmissionFile: fixtureFileName(
+      capture.transmission_file,
+      "capture.transmission_file",
+    ),
     deviceModel: nullableString(capture.device_model, "capture.device_model"),
-    recordedAt: nullableString(capture.recorded_at, "capture.recorded_at"),
-    recordingFile: nullableString(entry.recording_file, "recording_file"),
+    recordedAt: nullableIsoDateTime(capture.recorded_at, "capture.recorded_at"),
+    recordingFile: nullableFixtureFileName(
+      entry.recording_file,
+      "recording_file",
+    ),
+    recordingSha256: nullableSha256(entry.recording_sha256, "recording_sha256"),
     measurement: parseMeasurement(entry.measurement),
   };
   if (payload.type !== "text") throw new Error("Only Text corpus is supported");
@@ -86,7 +96,10 @@ function parseEntry(input: unknown): RecordingEntry {
   }
   if (
     status !== "planned" &&
-    (!parsed.deviceModel || !parsed.recordedAt || !parsed.recordingFile)
+    (!parsed.deviceModel ||
+      !parsed.recordedAt ||
+      !parsed.recordingFile ||
+      !parsed.recordingSha256)
   ) {
     throw new Error(`Captured corpus metadata is incomplete for ${parsed.id}`);
   }
@@ -108,7 +121,7 @@ function parseMeasurement(input: unknown): RecordingMeasurement | null {
       value.raw_symbol_accuracy_percent,
       "measurement.raw_symbol_accuracy_percent",
     ),
-    correctedErrors: nonNegativeNumber(
+    correctedErrors: nonNegativeInteger(
       value.corrected_errors,
       "measurement.corrected_errors",
     ),
@@ -145,11 +158,60 @@ function nullableString(value: unknown, name: string): string | null {
   return value === null ? null : string(value, name);
 }
 
+export function fixtureFileName(value: unknown, name: string): string {
+  const result = string(value, name);
+  if (!/^[A-Za-z0-9][A-Za-z0-9._-]*\.(?:m4a|wav)$/i.test(result)) {
+    throw new Error(`${name} must be a local M4A or WAV fixture filename`);
+  }
+  return result;
+}
+
+export function fixtureSha256(fileName: string): string {
+  const safeName = fixtureFileName(fileName, "fixture filename");
+  return createHash("sha256")
+    .update(fs.readFileSync(path.join(corpusRoot, safeName)))
+    .digest("hex");
+}
+
+function nullableFixtureFileName(value: unknown, name: string): string | null {
+  return value === null ? null : fixtureFileName(value, name);
+}
+
+function nullableIsoDateTime(value: unknown, name: string): string | null {
+  const result = nullableString(value, name);
+  if (
+    result !== null &&
+    (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(
+      result,
+    ) ||
+      Number.isNaN(Date.parse(result)))
+  ) {
+    throw new Error(`${name} must be an ISO-8601 datetime`);
+  }
+  return result;
+}
+
+function nullableSha256(value: unknown, name: string): string | null {
+  const result = nullableString(value, name);
+  if (result !== null && !/^[a-f0-9]{64}$/.test(result)) {
+    throw new Error(`${name} must be a lowercase SHA-256 digest`);
+  }
+  return result;
+}
+
 function nonNegativeNumber(value: unknown, name: string): number {
   if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
     throw new Error(`${name} must be a non-negative number`);
   }
   return value;
+}
+
+function nonNegativeInteger(value: unknown, name: string): number {
+  const result = nonNegativeNumber(value, name);
+  if (!Number.isSafeInteger(result)) {
+    throw new Error(`${name} must be a non-negative integer`);
+  }
+  return result;
 }
 
 function positiveNumber(value: unknown, name: string): number {
