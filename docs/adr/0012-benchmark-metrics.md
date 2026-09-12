@@ -57,3 +57,11 @@ MIDIはPure Digital baselineとしてclean round-trip成功時にFinal Recovery�
 ## Opus fixture追記
 
 Opus往復fixtureは、プリエコーで音長境界が変形するrhythmic profileではなく、単音・固定symbol slotの`FixedFallback`を使う。RustでのOpus往復とPlaywrightでのWeb Audio importの両方を確認対象とする。rhythmic profileの損失圧縮対応は別のdecoder改善として追跡する。
+
+## 実録音telemetry境界
+
+実録音では期待するTextからprofile別のclean packetを再構成し、音響decoderがFEC前に返したraw packetとbit単位で比較する。ブラウザ側はWeb AudioでM4A/WAVをPCMへ変換し、Rust/WASM境界からFinal Recovery Rate、Raw Symbol Accuracy、Corrected Errorsを取得する。Payload Bitrate、Decode Time、Playback Durationを加えた6指標をPlaywright artifactへ出力する。
+
+実録音が復元できない場合も0%として記録し、成功caseだけを母数にして性能を過大評価しない。decode wall-clockだけは実行環境依存のため、corpusのverified値との厳密一致対象にしない。
+
+最初の1m iPhone録音では、送信WAV比で平均levelが約17 dB低下し、一部symbolのGoertzel energyが従来の絶対floorを下回った。一方で同期周波数の相対優位は維持され、raw packetの誤りは3 bitだけだった。このためFixedFallbackは同期の相対判定を維持しつつsymbol energy floorを下げ、FECへraw packetを渡す方針とした。無音・非有限値・不正framingの拒否は維持する。

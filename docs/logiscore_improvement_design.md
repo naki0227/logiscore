@@ -1246,6 +1246,20 @@ wall-clockの速度値と、機能的な成否・精度値は分離する。通�
 7. 電話回線は別通信路として`VoiceCallProfile`を設計し、まず数十byteの完全復元を目指す。
 8. 上記の評価reportとデモを揃えてv2を完成・公開する。Visual Codecはv2 Acousticの性能境界を確定後、v3として開始する。
 
+### 1m実録音baseline（2026-09-12 verified）
+
+`Hello from Logiscore.`をFixedFallbackでMacBook Speakerから再生し、1m離れたiPhone Voice Memosで無加工M4Aとして収録した。Playwright / Web Audioによる自動検証で元Textへ完全復元した。
+
+```text
+Final Recovery Rate       100%
+Raw Symbol Accuracy       99.86462093862816%
+Corrected Errors          3 bit
+Payload Bitrate           1.2024851359476252 bps
+Playback Duration         139710.66666666666 ms
+```
+
+Decode Timeは実行host依存のため観測値として保存するが、厳密な回帰比較から除外する。このbaselineは空気伝送の成立を示す一方、単音FixedFallbackの音楽性やbitrateが完成品質であることは示さない。
+
 ---
 
 # 34. 成功条件

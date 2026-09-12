@@ -1,10 +1,10 @@
 # Logiscore Todo
 
-最終更新: 2026-09-10
+最終更新: 2026-09-12
 
 ## 進行中
 
-- [進行中] v2 Phase 9: Benchmark
+- [完了] v2 Phase 9: Benchmark
   - [完了] 決定論的fixtureとJSON report schema
   - [完了] Dense / Rhythmic / 全Acoustic profile / Secureの速度・size・bitrate計測
   - [完了] 5段階の決定論的channel recovery計測
@@ -13,17 +13,22 @@
     - [完了] Final Recovery Rate / Raw Symbol Accuracy / Corrected Errorsのtelemetry
   - [完了] 32/128/256-byte fixture reportとfunctional regression比較
   - [完了] FixedFallbackのOpus round-trip fixture / Rust・Playwright復元
-  - [進行中] smartphone recording corpus
+  - [完了] smartphone recording corpus
     - [完了] manifest schema、収録手順、planned/captured/verified validation
     - [完了] captured M4Aを自動復元するPlaywrightシナリオ
-    - [未着手] MacBook Speaker→1m→iPhone Voice Memosの実M4A収録
-    - [未着手] 実録音の6共通指標report
+    - [完了] 実録音PCMの6共通指標telemetryとPlaywright artifact
+    - [完了] 1m Text収録用FixedFallback transmission WAV
+    - [完了] MacBook Speaker→1m→iPhone Voice Memosの実M4A収録
+    - [完了] 実M4A測定値のcorpus登録とverified化
 
 ## 未着手
 
 - [未着手] 701KB超のWeb bundleをcode splittingする
 - [未着手] rhythmic acoustic profileのOpus後プリエコーに耐えるtone-boundary検出を設計する
-- [未着手] v2 field validation 2: MacBook→1m→iPhone Voice Memos→M4AのText/File/Project corpus
+- [進行中] v2 field validation 2: MacBook→1m→iPhone Voice Memos→M4AのText/File/Project corpus
+  - [完了] TextをFixedFallbackで完全復元
+  - [未着手] Source File実録音
+  - [未着手] Project実録音
 - [未着手] v2 field validation 3: 任意位置・ループ録音のchunk/checkpoint protocol
 - [未着手] v2 field validation 4: 会話・TV・音楽・Café・残響の実環境matrix
 - [未着手] v2 field validation 5: PCM/Opus/AAC/MP3/resampling codec matrix
@@ -127,4 +132,4 @@
 
 ## 次回最初に着手するタスク
 
-実smartphone recording corpusの受入schemaと収録手順を設計する。最初に `docs/logiscore_improvement_design.md` のLevel 4 / v2フィールド検証roadmap、`docs/TODO.md`、`packages/harmonic-core/src/benchmark.rs` を読む。最初のコマンドは `cargo test --all-targets --all-features --locked` と `npm run test:e2e`。
+v2 field validation 3の任意位置・ループ録音に向けてchunk/checkpoint protocolを設計する。最初に `docs/logiscore_improvement_design.md`、`docs/adr/0012-benchmark-metrics.md`、`docs/TODO.md` を読む。最初のコマンドは `cargo test --all-targets --all-features --locked` と `npm run test:e2e`。
