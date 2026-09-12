@@ -1,6 +1,7 @@
 mod assembly;
 mod audio;
 mod frame;
+mod soft;
 
 pub use assembly::reconstruct_checkpoint_packet;
 pub use audio::{

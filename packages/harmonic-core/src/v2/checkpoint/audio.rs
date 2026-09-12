@@ -1,8 +1,8 @@
 use std::collections::BTreeMap;
 
 use super::{
-    decode_checkpoint_chunk, reconstruct_checkpoint_packet, split_checkpoint_packet,
-    CheckpointChunk,
+    decode_checkpoint_chunk, reconstruct_checkpoint_packet, soft::recover_soft_chunks,
+    split_checkpoint_packet, CheckpointChunk,
 };
 use crate::adaptive::{AcousticProfile, AcousticProfileId};
 use crate::audio::{FixedPcmCodec, MiniFixedPcmCodec, PcmProfile};
@@ -56,12 +56,16 @@ pub fn decode_checkpoint_loop_recording(
 ) -> Result<Vec<u8>, LogiscoreError> {
     let profile = AcousticProfile::for_id(AcousticProfileId::FixedFallback);
     let pcm_profile = PcmProfile::with_timing_percent(profile.timing_percent)?;
-    let mut packets =
-        MiniFixedPcmCodec::new(pcm_profile).decode_all_at_sample_rate(samples, sample_rate)?;
-    if packets.is_empty() {
-        packets =
-            FixedPcmCodec::new(pcm_profile).decode_all_at_sample_rate(samples, sample_rate)?;
-    }
+    let mini_observations = MiniFixedPcmCodec::new(pcm_profile)
+        .decode_all_observations_at_sample_rate(samples, sample_rate)?;
+    let packets = if mini_observations.is_empty() {
+        FixedPcmCodec::new(pcm_profile).decode_all_at_sample_rate(samples, sample_rate)?
+    } else {
+        mini_observations
+            .iter()
+            .map(|observation| observation.bytes.clone())
+            .collect()
+    };
     let mut transfers = BTreeMap::<(u32, u16, u32), Vec<CheckpointChunk>>::new();
     for packet in packets {
         if let Ok(chunk) = decode_checkpoint_chunk(&packet) {
@@ -70,6 +74,12 @@ pub fn decode_checkpoint_loop_recording(
                 .or_default()
                 .push(chunk);
         }
+    }
+    for chunk in recover_soft_chunks(&mini_observations) {
+        transfers
+            .entry((chunk.transfer_id(), chunk.count(), chunk.total_length()))
+            .or_default()
+            .push(chunk);
     }
     let mut recovered = transfers
         .values()
@@ -167,6 +177,26 @@ mod tests {
         let mut recording = Vec::new();
         for chunk in split_checkpoint_packet(packet, 16).unwrap() {
             recording.extend(codec.encode(&chunk.encode().unwrap()).unwrap());
+        }
+        assert_eq!(
+            decode_checkpoint_loop_recording(&recording, 8_000).unwrap(),
+            packet
+        );
+    }
+
+    #[test]
+    fn soft_combine_recovers_three_crc_invalid_acoustic_observations() {
+        let packet = b"three damaged loops recover by symbol confidence";
+        let profile = AcousticProfile::for_id(AcousticProfileId::FixedFallback);
+        let pcm_profile = PcmProfile::with_timing_percent(profile.timing_percent).unwrap();
+        let codec = MiniFixedPcmCodec::new(pcm_profile);
+        let mut recording = encode_checkpoint_loop(packet, 512, 3).unwrap();
+        let frame_length = recording.len() / 3;
+        for (loop_index, byte_index) in [19usize, 20, 21].into_iter().enumerate() {
+            let start = loop_index * frame_length;
+            let frame = &mut recording[start..start + frame_length];
+            codec.overwrite_encoded_nibble(frame, byte_index, true, 15);
+            assert!(decode_checkpoint_loop_recording(frame, 8_000).is_err());
         }
         assert_eq!(
             decode_checkpoint_loop_recording(&recording, 8_000).unwrap(),

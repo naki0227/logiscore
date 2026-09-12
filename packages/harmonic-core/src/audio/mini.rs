@@ -28,6 +28,12 @@ pub(crate) struct MiniFixedPcmCodec {
     profile: PcmProfile,
 }
 
+#[derive(Debug, Clone)]
+pub(crate) struct MiniPcmObservation {
+    pub(crate) bytes: Vec<u8>,
+    pub(crate) nibble_confidences: Vec<f32>,
+}
+
 impl MiniFixedPcmCodec {
     pub const fn new(profile: PcmProfile) -> Self {
         Self { profile }
@@ -57,11 +63,11 @@ impl MiniFixedPcmCodec {
         Ok(samples)
     }
 
-    pub fn decode_all_at_sample_rate(
+    pub fn decode_all_observations_at_sample_rate(
         self,
         samples: &[f32],
         source_sample_rate: u32,
-    ) -> Result<Vec<Vec<u8>>, LogiscoreError> {
+    ) -> Result<Vec<MiniPcmObservation>, LogiscoreError> {
         let normalized = resample::linear(
             samples,
             source_sample_rate,
@@ -69,25 +75,25 @@ impl MiniFixedPcmCodec {
             MAX_PCM_SAMPLES,
         )?;
         validate_samples(&normalized)?;
-        let mut packets = Vec::new();
+        let mut observations = Vec::new();
         let mut consumed_until = 0;
         for sync_start in checkpoint_onsets(&normalized, self.profile) {
             if sync_start < consumed_until {
                 continue;
             }
-            if let Ok((packet, frame_end)) = self.decode_from_sync(&normalized, sync_start) {
-                packets.push(packet);
+            if let Ok((observation, frame_end)) = self.decode_from_sync(&normalized, sync_start) {
+                observations.push(observation);
                 consumed_until = frame_end;
             }
         }
-        Ok(packets)
+        Ok(observations)
     }
 
     fn decode_from_sync(
         self,
         samples: &[f32],
         sync_start: usize,
-    ) -> Result<(Vec<u8>, usize), LogiscoreError> {
+    ) -> Result<(MiniPcmObservation, usize), LogiscoreError> {
         self.verify_sync(samples, sync_start)?;
         let length_start = sync_start
             + self
@@ -105,14 +111,24 @@ impl MiniFixedPcmCodec {
         let tone_samples = self.profile.samples_for_ms(SYMBOL_TONE_MS);
         let stride = tone_samples + self.profile.samples_for_ms(SYMBOL_REST_MS);
         let mut packet = Vec::with_capacity(packet_length);
+        let mut nibble_confidences = Vec::with_capacity(packet_length.saturating_mul(2));
         for _ in 0..packet_length {
-            let high = self.decode_nibble(slice(samples, cursor, tone_samples)?)?;
+            let (high, high_confidence) =
+                self.decode_nibble(slice(samples, cursor, tone_samples)?)?;
             cursor = cursor.saturating_add(stride);
-            let low = self.decode_nibble(slice(samples, cursor, tone_samples)?)?;
+            let (low, low_confidence) =
+                self.decode_nibble(slice(samples, cursor, tone_samples)?)?;
             cursor = cursor.saturating_add(stride);
             packet.push((high << 4) | low);
+            nibble_confidences.extend([high_confidence, low_confidence]);
         }
-        Ok((packet, cursor))
+        Ok((
+            MiniPcmObservation {
+                bytes: packet,
+                nibble_confidences,
+            },
+            cursor,
+        ))
     }
 
     fn append_sync(self, samples: &mut Vec<f32>) {
@@ -205,8 +221,8 @@ impl MiniFixedPcmCodec {
         Ok(length)
     }
 
-    fn decode_nibble(self, samples: &[f32]) -> Result<u8, LogiscoreError> {
-        (0..16u8)
+    fn decode_nibble(self, samples: &[f32]) -> Result<(u8, f32), LogiscoreError> {
+        let mut energies = (0..16u8)
             .map(|nibble| {
                 (
                     goertzel(
@@ -217,10 +233,16 @@ impl MiniFixedPcmCodec {
                     nibble,
                 )
             })
-            .max_by(|left, right| left.0.total_cmp(&right.0))
-            .filter(|(energy, _)| *energy > MIN_SYMBOL_TONE_ENERGY)
-            .map(|(_, nibble)| nibble)
-            .ok_or_else(|| invalid_audio("mini symbol was not detected"))
+            .collect::<Vec<_>>();
+        energies.sort_by(|left, right| right.0.total_cmp(&left.0));
+        let (best_energy, nibble) = energies[0];
+        if best_energy <= MIN_SYMBOL_TONE_ENERGY {
+            return Err(invalid_audio("mini symbol was not detected"));
+        }
+        let second_energy = energies[1].0;
+        let confidence =
+            ((best_energy - second_energy) / best_energy.max(f32::EPSILON)).clamp(0.0, 1.0);
+        Ok((nibble, confidence))
     }
 
     fn estimated_samples(self, packet_length: usize) -> Result<usize, LogiscoreError> {
@@ -240,39 +262,32 @@ impl MiniFixedPcmCodec {
             .filter(|length| *length <= MAX_PCM_SAMPLES)
             .ok_or_else(|| invalid_audio("mini PCM output exceeds sample limit"))
     }
+
+    #[cfg(test)]
+    pub(crate) fn overwrite_encoded_nibble(
+        self,
+        samples: &mut [f32],
+        byte_index: usize,
+        high_nibble: bool,
+        replacement: u8,
+    ) {
+        let framing_ms = LEADING_SILENCE_MS
+            + SYNC_TONE_MS * 2
+            + SYNC_GAP_MS
+            + AFTER_SYNC_MS
+            + LENGTH_BIT_MS * LENGTH_BITS as u32
+            + AFTER_LENGTH_MS;
+        let stride = self.profile.samples_for_ms(SYMBOL_TONE_MS + SYMBOL_REST_MS);
+        let nibble_index = byte_index * 2 + usize::from(!high_nibble);
+        let start = self.profile.samples_for_ms(framing_ms) + nibble_index * stride;
+        let tone_samples = self.profile.samples_for_ms(SYMBOL_TONE_MS);
+        let frequency = midi_frequency(FIRST_SYMBOL_NOTE + replacement);
+        for (index, sample) in samples[start..start + tone_samples].iter_mut().enumerate() {
+            let time = index as f32 / self.profile.sample_rate() as f32;
+            *sample = (std::f32::consts::TAU * frequency * time).sin() * 0.6;
+        }
+    }
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::audio::FixedPcmCodec;
-
-    #[test]
-    fn mini_codec_roundtrips_multiple_frames_after_arbitrary_start() {
-        let profile = PcmProfile::with_timing_percent(200).unwrap();
-        let codec = MiniFixedPcmCodec::new(profile);
-        let first = codec.encode(b"first").unwrap();
-        let second = codec.encode(b"second").unwrap();
-        let mut recording = first[first.len() / 2..].to_vec();
-        recording.extend(second);
-        assert_eq!(
-            codec.decode_all_at_sample_rate(&recording, 8_000).unwrap(),
-            vec![b"second".to_vec()]
-        );
-    }
-
-    #[test]
-    fn mini_framing_is_shorter_than_legacy_fixed_framing() {
-        let profile = PcmProfile::with_timing_percent(200).unwrap();
-        let mini = MiniFixedPcmCodec::new(profile).encode(&[]).unwrap();
-        let legacy = FixedPcmCodec::new(profile).encode(&[]).unwrap();
-        assert!(mini.len() * 4 < legacy.len());
-    }
-
-    #[test]
-    fn mini_codec_rejects_packets_outside_its_length_field() {
-        let profile = PcmProfile::default();
-        let packet = vec![0; MAX_MINI_PACKET_BYTES + 1];
-        assert!(MiniFixedPcmCodec::new(profile).encode(&packet).is_err());
-    }
-}
+mod tests;

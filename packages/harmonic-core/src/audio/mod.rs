@@ -10,7 +10,7 @@ mod wav;
 
 pub use channel::ChannelModel;
 pub use fixed::FixedPcmCodec;
-pub(crate) use mini::MiniFixedPcmCodec;
+pub(crate) use mini::{MiniFixedPcmCodec, MiniPcmObservation};
 pub use profile::PcmProfile;
 pub use wav::{decode_wav, encode_wav, PcmAudio};
 

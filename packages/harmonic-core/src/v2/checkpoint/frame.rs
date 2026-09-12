@@ -120,6 +120,18 @@ pub fn split_checkpoint_packet(
 }
 
 pub fn decode_checkpoint_chunk(bytes: &[u8]) -> Result<CheckpointChunk, LogiscoreError> {
+    let chunk = decode_checkpoint_chunk_unchecked(bytes)?;
+    let checksum_offset = bytes.len() - CHECKSUM_BYTES;
+    let expected_checksum = read_u32(bytes, checksum_offset, "chunk checksum")?;
+    if crc32_checksum(&bytes[..checksum_offset]) != expected_checksum {
+        return Err(invalid_checkpoint("checkpoint chunk CRC-32 mismatch"));
+    }
+    Ok(chunk)
+}
+
+pub(super) fn decode_checkpoint_chunk_unchecked(
+    bytes: &[u8],
+) -> Result<CheckpointChunk, LogiscoreError> {
     if bytes.len() < HEADER_BYTES + CHECKSUM_BYTES {
         return Err(invalid_checkpoint("checkpoint chunk is truncated"));
     }
@@ -142,10 +154,6 @@ pub fn decode_checkpoint_chunk(bytes: &[u8]) -> Result<CheckpointChunk, Logiscor
         return Err(invalid_checkpoint("checkpoint chunk length does not match"));
     }
     let checksum_offset = bytes.len() - CHECKSUM_BYTES;
-    let expected_checksum = read_u32(bytes, checksum_offset, "chunk checksum")?;
-    if crc32_checksum(&bytes[..checksum_offset]) != expected_checksum {
-        return Err(invalid_checkpoint("checkpoint chunk CRC-32 mismatch"));
-    }
     CheckpointChunk::new(
         transfer_id,
         index,
