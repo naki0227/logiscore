@@ -1,6 +1,6 @@
 # Logiscore Todo
 
-最終更新: 2026-09-12
+最終更新: 2026-09-13
 
 ## 進行中
 
@@ -34,8 +34,11 @@
   - [完了] chunk CRC・順序再構成・重複観測hard voteのdomain実装
   - [完了] 既存同期点を録音全体から探索する任意開始位置decoder
   - [完了] clean 2周録音を統合するPlaywright scenario
-  - [未着手] 音響Mini Syncによるcheckpoint overhead短縮
-  - [未着手] symbol confidenceを使う破損観測のsoft combine
+  - [完了] 10-bit長フィールドの音響Mini Syncで同期overheadを旧方式の1/4未満へ短縮
+  - [完了] symbol confidenceを使う破損観測のsoft combineとCRC再検証
+  - [未着手] checkpoint loopのproduction UI、WAV download/import
+  - [未着手] 任意開始位置・2周以上の実iPhone録音corpus
+  - [未着手] Source File / Project / Secure payloadのcheckpoint WASM境界
 - [未着手] v2 field validation 4: 会話・TV・音楽・Café・残響の実環境matrix
 - [未着手] v2 field validation 5: PCM/Opus/AAC/MP3/resampling codec matrix
 - [未着手] v2 field validation 6: WebRTC後にGoogle Meet通信
@@ -138,4 +141,4 @@
 
 ## 次回最初に着手するタスク
 
-v2 field validation 3の任意位置・ループ録音に向けてchunk/checkpoint protocolを設計する。最初に `docs/logiscore_improvement_design.md`、`docs/adr/0012-benchmark-metrics.md`、`docs/TODO.md` を読む。最初のコマンドは `cargo test --all-targets --all-features --locked` と `npm run test:e2e`。
+v2 field validation 3を実環境へ接続するため、checkpoint loopのproduction UIとWAV download/importを実装する。最初に `docs/adr/0013-checkpoint-loop-protocol.md`、`packages/harmonic-core/src/v2/checkpoint/audio.rs`、`apps/web/src/hooks/useAcousticCodec.ts` を読む。最初のコマンドは `cargo test --all-targets --all-features --locked` と `npm run test:e2e -- checkpoint-loop.spec.ts`。

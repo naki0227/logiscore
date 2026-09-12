@@ -1246,6 +1246,8 @@ wall-clockの速度値と、機能的な成否・精度値は分離する。通�
 7. 電話回線は別通信路として`VoiceCallProfile`を設計し、まず数十byteの完全復元を目指す。
 8. 上記の評価reportとデモを揃えてv2を完成・公開する。Visual Codecはv2 Acousticの性能境界を確定後、v3として開始する。
 
+2026-09-13時点で手順3のprotocol基盤は、10-bit長フィールドのMini Sync、任意位置scanner、chunk順序再構成、hard vote、symbol-confidence soft combineまで実装済み。3周すべてが別symbol破損で各chunk CRCに落ちるPCMを統合し、chunk CRCと全packet CRCの再検証後に完全復元することをRust unit testとPlaywright Chromiumで確認した。production UI、WAV import/export、実iPhone loop corpusは未完了であり、field validation 3全体は進行中とする。
+
 ### 1m実録音baseline（2026-09-12 verified）
 
 `Hello from Logiscore.`をFixedFallbackでMacBook Speakerから再生し、1m離れたiPhone Voice Memosで無加工M4Aとして収録した。Playwright / Web Audioによる自動検証で元Textへ完全復元した。

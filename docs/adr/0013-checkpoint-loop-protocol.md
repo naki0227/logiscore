@@ -53,7 +53,8 @@ Chunk CRC-32         4 bytes
 - 同一indexの重複観測は完全一致数の多数決を行い、同数なら曖昧として拒否する。
 - 各chunk CRCに加えて、再構成後の全packet CRCをTransfer IDと照合する。
 - 別Transfer ID、chunk count、total lengthが混ざった入力は拒否する。
-- 音響層は各envelope前の同期点を探索する。symbol confidenceを使うsoft combineは、hard observation voteの次段階として同じenvelopeへ接続する。
+- 音響層は各envelope前の同期点を探索する。checkpoint専用Mini Syncは60 msのhigh/low toneと10-bit長フィールドを使い、旧32-bit full sync録音はdecode fallbackで維持する。
+- 各symbolは最大energy候補と次点の差をconfidenceとして保持する。CRC不合格の観測もmetadataが妥当な同一transfer/chunkに限ってnibble単位で重み付き統合し、統合後にchunk CRCと全packet CRCを再検証する。
 
 ## 採用理由
 
@@ -71,8 +72,8 @@ Chunk CRC-32         4 bytes
 
 - 各chunkに23 bytesの固定overheadが付く。
 - CRC-32のTransfer IDは暗号学的識別子ではない。
-- hard voteはCRCを通った観測しか統合できず、symbol confidenceによるsoft combineより情報量が少ない。
-- checkpointごとの同期音によりbitrateと音楽性が下がる。
+- soft combineはmetadata自体が壊れた観測を統合できない。
+- Mini Syncでもcheckpointごとの同期音は残るため、bitrateと音楽性は連続した音楽profileより低い。
 
 ## セキュリティとエラー方針
 
