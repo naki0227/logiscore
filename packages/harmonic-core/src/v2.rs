@@ -12,6 +12,7 @@ use crate::v2_packet::{
 mod adaptive_audio;
 pub use adaptive_audio::*;
 mod adaptive_decode;
+pub mod checkpoint;
 pub use adaptive_decode::*;
 mod secure_audio;
 pub use secure_audio::*;

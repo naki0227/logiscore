@@ -47,4 +47,7 @@ pub enum LogiscoreError {
 
     #[error("Invalid v2 packet: {0}")]
     InvalidPacket(String),
+
+    #[error("Invalid checkpoint stream: {0}")]
+    InvalidCheckpoint(String),
 }

@@ -1,6 +1,6 @@
 const POLYNOMIAL: u32 = 0xedb8_8320;
 
-pub(super) fn checksum(data: &[u8]) -> u32 {
+pub(crate) fn checksum(data: &[u8]) -> u32 {
     let mut crc = u32::MAX;
     for &byte in data {
         crc ^= u32::from(byte);

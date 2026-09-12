@@ -3,6 +3,8 @@ mod hamming;
 mod interleave;
 mod repetition;
 
+pub(crate) use crc32::checksum as crc32_checksum;
+
 use crate::error::LogiscoreError;
 
 const CHECKSUM_BYTES: usize = 4;
