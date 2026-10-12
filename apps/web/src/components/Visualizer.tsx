@@ -36,9 +36,10 @@ const Visualizer = forwardRef<VisualizerHandle>((_, ref) => {
       const normalized = (note - 24) / 84;
       const x = (isBass ? 0.1 + (note % 12) / 100 : normalized) * canvas.width;
 
+      // Enludus palette: purple bass, sky/orange melody
       const colors = isBass
-        ? ["#ffffff", "#6366f1"] // Bass: White/Indigo
-        : ["#8b5cf6", "#ec4899", "#3b82f6", "#10b981"]; // Melody: Colorful
+        ? ["#7268ae", "#5d5396"]
+        : ["#2d9fd6", "#92ddff", "#7268ae", "#ff9b61"];
 
       const color = colors[Math.floor(Math.random() * colors.length)];
 
@@ -64,9 +65,12 @@ const Visualizer = forwardRef<VisualizerHandle>((_, ref) => {
     let animationFrame: number;
 
     const render = () => {
-      // 画面クリア（少し残像を残す）
-      ctx.fillStyle = "rgba(10, 10, 15, 0.2)";
+      // 明るい背景の上で残像を少しずつ消す
+      ctx.save();
+      ctx.globalCompositeOperation = "destination-out";
+      ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.restore();
 
       // 粒子更新
       particlesRef.current = particlesRef.current.filter((p) => {
@@ -79,7 +83,7 @@ const Visualizer = forwardRef<VisualizerHandle>((_, ref) => {
       for (const p of particlesRef.current) {
         ctx.save();
         ctx.globalAlpha = p.opacity;
-        ctx.shadowBlur = 15;
+        ctx.shadowBlur = 8;
         ctx.shadowColor = p.color;
         ctx.fillStyle = p.color;
         // 角丸の矩形

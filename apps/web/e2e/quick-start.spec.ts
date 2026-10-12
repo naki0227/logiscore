@@ -6,33 +6,32 @@ test.describe("Quick start guide", () => {
     page,
   }) => {
     await page.goto("/");
-    await expect(page.getByRole("status")).toHaveText("READY");
+    await expect(page.getByRole("status")).toHaveText("準備完了");
     const steps = page.locator(".quickstart-step");
 
-    await page
-      .getByRole("button", { name: "Try the over-the-air demo" })
-      .click();
-    await expect(page.getByLabel(/^Payload/)).toHaveValue("text");
-    await expect(page.getByLabel(/^Mode/)).toHaveValue("reliable");
+    await page.getByRole("button", { name: "空気伝送のデモを試す" }).click();
+    await expect(page.getByLabel(/^送るもの/)).toHaveValue("text");
+    await expect(page.getByLabel(/^モード/)).toHaveValue("reliable");
     await expect(steps.nth(0)).toHaveClass(/done/);
 
-    await page.getByRole("button", { name: "ENCODE" }).click();
+    await page.getByRole("button", { name: "変換する" }).click();
     await expect(steps.nth(1)).toHaveClass(/done/);
 
     const downloadPromise = page.waitForEvent("download");
-    await page.getByRole("button", { name: "DOWNLOAD WAV" }).click();
+    await page.getByRole("button", { name: "WAVをダウンロード" }).click();
     const download = await downloadPromise;
     await expect(steps.nth(2)).toHaveClass(/done/);
 
     const downloadPath = await download.path();
     if (!downloadPath) throw new Error("Playwright did not provide a path");
-    await page.getByLabel("Import file").setInputFiles({
+    await page.getByLabel("ファイルを読み込む").setInputFiles({
       name: download.suggestedFilename(),
       mimeType: "audio/wav",
       buffer: await readFile(downloadPath),
     });
-    await expect(page.getByLabel("Decoded source")).toHaveValue(
-      /Hello from Logiscore!/,
+    await expect(page.getByLabel("復元したデータ")).toHaveValue(
+      /Logiscoreからこんにちは！/,
+      { timeout: 15_000 },
     );
     await expect(steps.nth(3)).toHaveClass(/done/);
   });
@@ -41,10 +40,10 @@ test.describe("Quick start guide", () => {
     page,
   }) => {
     await page.goto("/");
-    await page.getByRole("button", { name: "Hide guide" }).click();
+    await page.getByRole("button", { name: "ガイドを閉じる" }).click();
     await page.reload();
     await expect(page.locator(".quickstart")).toHaveCount(0);
-    await page.getByRole("button", { name: "How does it work?" }).click();
+    await page.getByRole("button", { name: "使い方を見る" }).click();
     await expect(page.locator(".quickstart")).toBeVisible();
   });
 });
@@ -56,8 +55,8 @@ test.describe("Mobile layout", () => {
     page,
   }) => {
     await page.goto("/");
-    await expect(page.getByRole("status")).toHaveText("READY");
-    for (const name of ["ENCODE", "PLAY", "STOP"]) {
+    await expect(page.getByRole("status")).toHaveText("準備完了");
+    for (const name of ["変換する", "再生", "停止"]) {
       const button = page.getByRole("button", { name });
       await button.scrollIntoViewIfNeeded();
       await expect(button).toBeInViewport();

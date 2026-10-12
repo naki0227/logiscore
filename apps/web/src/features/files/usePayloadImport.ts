@@ -28,7 +28,7 @@ interface PayloadImportOptions {
 export function usePayloadImport(options: PayloadImportOptions) {
   const applyMidi = async (file: File) => {
     options.stop();
-    options.setStatus("IMPORTING MIDI...");
+    options.setStatus("MIDIを読み込み中…");
     try {
       const decoded = options.decodeMidi(
         new Uint8Array(await file.arrayBuffer()),
@@ -37,7 +37,7 @@ export function usePayloadImport(options: PayloadImportOptions) {
     } catch {
       options.setPayload("source-file");
       options.setProjectFiles([]);
-      options.setStatus("⚠️ Unsupported or damaged Logiscore MIDI");
+      options.setStatus("⚠️ LogiscoreのMIDIではないか、ファイルが壊れています");
     }
   };
 
@@ -56,7 +56,7 @@ export function usePayloadImport(options: PayloadImportOptions) {
 
   const applyAudio = async (file: File) => {
     options.stop();
-    options.setStatus("IMPORTING RECORDING...");
+    options.setStatus("録音を解析中…");
     try {
       const decoded = await options.decodeAudio(file);
       options.setMode(options.mode === "secure" ? "secure" : "reliable");
@@ -64,7 +64,7 @@ export function usePayloadImport(options: PayloadImportOptions) {
     } catch {
       options.setPayload("source-file");
       options.setProjectFiles([]);
-      options.setStatus("⚠️ Unsupported or damaged Logiscore recording");
+      options.setStatus("⚠️ Logiscoreの録音として認識できませんでした");
     }
   };
 
@@ -84,7 +84,7 @@ export function usePayloadImport(options: PayloadImportOptions) {
       void applyProjectFiles(files, options);
       return;
     }
-    void applySource(file, "✅ SOURCE LOADED");
+    void applySource(file, "✅ ファイルを読み込みました");
   };
 
   const handleDragOver = (event: DragEvent) => {
@@ -96,13 +96,15 @@ export function usePayloadImport(options: PayloadImportOptions) {
     handleDragOver(event);
     const entry = event.dataTransfer.items?.[0]?.webkitGetAsEntry();
     if (entry?.isDirectory) {
-      options.setStatus("SCANNING PROJECT...");
+      options.setStatus("プロジェクトを読み込み中…");
       const files = await scanProjectEntry(entry);
       if (files.length > 0) {
         options.setProjectFiles(files);
         options.setPayload("project");
         options.setFilename(entry.name);
-        options.setStatus(`PROJECT LOADED: ${files.length} FILES`);
+        options.setStatus(
+          `プロジェクトを読み込みました: ${files.length} ファイル`,
+        );
       }
       return;
     }
@@ -111,7 +113,7 @@ export function usePayloadImport(options: PayloadImportOptions) {
     if (!file) return;
     if (isMidi(file)) await applyMidi(file);
     else if (isAudio(file)) await applyAudio(file);
-    else await applySource(file, "✅ SOURCE DROPPED");
+    else await applySource(file, "✅ ファイルを読み込みました");
   };
 
   return { handleImport, handleDragOver, handleDrop };
@@ -126,7 +128,7 @@ function applyDecodedPayload(
     options.setProjectFiles(decoded.files);
     options.setUiMode("encode");
     options.setStatus(
-      `✅ V${decoded.version} PROJECT IMPORTED: ${decoded.files.length} FILES`,
+      `✅ プロジェクトを復元しました: ${decoded.files.length} ファイル`,
     );
     return;
   }
@@ -139,8 +141,8 @@ function applyDecodedPayload(
   options.setUiMode("decode");
   options.setStatus(
     decoded.type === "text"
-      ? "✅ V2 TEXT IMPORTED"
-      : `✅ V${decoded.version} SOURCE FILE IMPORTED`,
+      ? "✅ テキストを復元しました"
+      : "✅ ソースファイルを復元しました",
   );
 }
 
@@ -148,7 +150,7 @@ async function applyProjectFiles(
   selectedFiles: FileList,
   options: PayloadImportOptions,
 ) {
-  options.setStatus("SCANNING PROJECT...");
+  options.setStatus("プロジェクトを読み込み中…");
   const files = (
     await Promise.all(
       Array.from(selectedFiles).map(
@@ -165,14 +167,14 @@ async function applyProjectFiles(
     )
   ).filter((file): file is ProjectFile => file !== null);
   if (files.length === 0) {
-    options.setStatus("⚠️ NO SUPPORTED PROJECT FILES");
+    options.setStatus("⚠️ 対応しているファイルが見つかりません");
     return;
   }
   const relativeRoot = files[0]?.name.split("/")[0];
   options.setProjectFiles(files);
   options.setFilename(relativeRoot || "logiscore_project");
   options.setUiMode("encode");
-  options.setStatus(`PROJECT LOADED: ${files.length} FILES`);
+  options.setStatus(`プロジェクトを読み込みました: ${files.length} ファイル`);
 }
 
 function isMidi(file: File): boolean {

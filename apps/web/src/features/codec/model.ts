@@ -78,13 +78,13 @@ export function protocolLabel(
 }
 
 const MODE_DESCRIPTIONS: Record<ModeSelection, string> = {
-  auto: "Compact MIDI file. Good for downloading and sharing.",
-  fast: "Densest MIDI encoding for the smallest file.",
-  music: "Rhythmic MIDI that sounds more musical. Larger file.",
+  auto: "小さなMIDIファイルを作ります。ダウンロードや共有に向いています。",
+  fast: "最も詰め込んだMIDIで、ファイルを一番小さくします。",
+  music: "リズムのある、より音楽らしいMIDIにします。ファイルは大きくなります。",
   reliable:
-    "Error-corrected WAV that survives speaker → microphone. Use this to send over the air.",
+    "誤り訂正つきのWAVを作ります。スピーカーで鳴らしてマイクで録音しても復元できます。空気を通して送るときはこれを選んでください。",
   secure:
-    "Reliable WAV plus password encryption. Only someone with the password can restore it.",
+    "空気伝送に加えて、パスワードで暗号化します。パスワードを知っている人だけが復元できます。",
 };
 
 export function modeDescription(mode: ModeSelection): string {

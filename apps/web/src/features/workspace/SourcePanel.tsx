@@ -40,10 +40,10 @@ export function SourcePanel(props: SourcePanelProps) {
         <Panel
           title={
             isProject
-              ? "PROJECT RADIUS"
+              ? "プロジェクト"
               : isText
-                ? "TEXT PAYLOAD"
-                : "SOURCE CODE"
+                ? "送るテキスト"
+                : "ソースコード"
           }
           className="editor-panel"
           headerAction={
@@ -58,7 +58,7 @@ export function SourcePanel(props: SourcePanelProps) {
         </Panel>
       ) : (
         <Panel
-          title={`INPUT ${props.inputFormat}`}
+          title={`読み込んだ${props.inputFormat}`}
           className="input-panel-midi"
           headerAction={<ImportButton onImport={props.onImport} />}
         >
@@ -69,20 +69,20 @@ export function SourcePanel(props: SourcePanelProps) {
               </div>
               <div className="midi-card-info">
                 <div className="midi-filename">
-                  Imported {props.inputFormat} Data
+                  読み込んだ{props.inputFormat}データ
                 </div>
                 <div className="midi-filesize">
-                  {props.inputSize.toLocaleString()} BYTES
+                  {props.inputSize.toLocaleString()} バイト
                 </div>
               </div>
-              <div className="input-label">READY TO DECODE</div>
+              <div className="input-label">復元しました</div>
               <button
                 className="btn-icon circle-large"
                 onClick={() => props.onUiModeChange("encode")}
               >
                 <Icons.Edit />
               </button>
-              <p className="hint-text">Click to edit source code</p>
+              <p className="hint-text">クリックすると編集に戻ります</p>
             </div>
           </div>
         </Panel>
@@ -98,7 +98,7 @@ function SourceActions(
     <div className="header-actions">
       <button
         className={`btn-icon ${props.isProject ? "active" : ""}`}
-        title="Project Mode"
+        title="プロジェクトモードの切り替え"
         onClick={() =>
           props.onPayloadChange(props.isProject ? "source-file" : "project")
         }
@@ -140,12 +140,14 @@ function ImportButton({
   return (
     <label
       className="btn-icon"
-      title={midiOnly ? "Import MIDI or recording" : "Import File"}
+      title={midiOnly ? "MIDIまたは録音を読み込む" : "ファイルを読み込む"}
     >
       <Icons.Import />
       <input
         type="file"
-        aria-label={midiOnly ? "Import MIDI or recording" : "Import file"}
+        aria-label={
+          midiOnly ? "MIDIまたは録音を読み込む" : "ファイルを読み込む"
+        }
         accept={
           midiOnly
             ? ".mid,.midi,.wav,.m4a,.mp3,.opus,.ogg,.aac"
@@ -164,11 +166,11 @@ function ProjectFolderButton({
   onImport: (event: ChangeEvent<HTMLInputElement>) => void;
 }) {
   return (
-    <label className="btn-icon" title="Import Project Folder">
+    <label className="btn-icon" title="プロジェクトフォルダを読み込む">
       <Icons.Node />
       <input
         type="file"
-        aria-label="Import Project folder"
+        aria-label="プロジェクトフォルダを読み込む"
         multiple
         {...{ webkitdirectory: "" }}
         hidden
@@ -181,28 +183,21 @@ function ProjectFolderButton({
 function ProjectFiles(props: SourcePanelProps) {
   return (
     <div className="project-file-list">
-      <div
-        className="project-header"
-        style={{ display: "flex", alignItems: "center", gap: "8px" }}
-      >
+      <div className="project-header">
         <span className="project-name">{props.filename}</span>
         <span className="project-count">
-          {props.projectFiles.length} tracks
+          {props.projectFiles.length} ファイル
         </span>
         {props.systemVersion && (
-          <span
-            className="project-version"
-            style={{ fontSize: "10px", opacity: 0.5 }}
-          >
-            Protocol v{props.systemVersion}
+          <span className="project-version">
+            プロトコル v{props.systemVersion}
           </span>
         )}
         {props.projectFiles.length > 0 && (
           <button
-            className="btn-icon"
+            className="btn-icon project-zip"
             onClick={props.onDownloadZip}
-            title="Download Source ZIP"
-            style={{ marginLeft: "auto" }}
+            title="ソースをZIPでダウンロード"
           >
             <Icons.Download /> ZIP
           </button>
@@ -219,7 +214,7 @@ function ProjectFiles(props: SourcePanelProps) {
         ))}
         {props.projectFiles.length === 0 && (
           <div className="project-placeholder">
-            Drop a folder here to start Symphony
+            ここにプロジェクトフォルダをドロップするか、上のフォルダボタンから読み込んでください
           </div>
         )}
       </div>
@@ -231,7 +226,7 @@ function SourceEditor(props: SourcePanelProps & { isText: boolean }) {
   return (
     <textarea
       className="code-input"
-      aria-label={props.isText ? "Text payload" : "Source code"}
+      aria-label={props.isText ? "送るテキスト" : "ソースコード"}
       value={props.source}
       onChange={(event) => {
         props.onSourceChange(event.target.value);
@@ -240,8 +235,8 @@ function SourceEditor(props: SourcePanelProps & { isText: boolean }) {
       spellCheck={false}
       placeholder={
         props.isText
-          ? "Type a message to transmit..."
-          : "Paste your source code here..."
+          ? "送りたいメッセージを入力してください…"
+          : "ここにソースコードを貼り付けてください…"
       }
     />
   );

@@ -57,7 +57,7 @@ export function ControlsPanel(props: ControlsPanelProps) {
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: 0.2 }}
     >
-      <Panel title="CONTROLS" className="controls-panel">
+      <Panel title="操作" className="controls-panel">
         <CodecSelector
           payload={props.payload}
           mode={props.mode}
@@ -85,10 +85,10 @@ export function ControlsPanel(props: ControlsPanelProps) {
         )}
         {props.extensionInfo && (
           <div className="info-display">
-            <Info label="Language" value={props.extensionInfo.name} />
-            <Info label="Scale" value={props.extensionInfo.scale_name} />
+            <Info label="言語" value={props.extensionInfo.name} />
+            <Info label="音階" value={props.extensionInfo.scale_name} />
             <Info
-              label="Root"
+              label="主音"
               value={NOTES[props.extensionInfo.root_key] ?? "-"}
             />
           </div>
@@ -104,25 +104,25 @@ export function ControlsPanel(props: ControlsPanelProps) {
               (props.mode === "secure" && !props.secureValidation.valid)
             }
           >
-            {props.processing ? <div className="spinner-small" /> : "ENCODE"}
+            {props.processing ? <div className="spinner-small" /> : "変換する"}
           </button>
           <button
             className="btn btn-play"
             onClick={props.onPlay}
             disabled={props.encodedSize === null || props.playing}
           >
-            <Icons.Play /> PLAY
+            <Icons.Play /> 再生
           </button>
           <button
             className="btn btn-stop"
             onClick={props.onStop}
             disabled={!props.playing}
           >
-            <Icons.Stop /> STOP
+            <Icons.Stop /> 停止
           </button>
         </div>
         <div className="progress-container">
-          <div className="progress-label">PROGRESS</div>
+          <div className="progress-label">再生の進み具合</div>
           <div className="progress-bar-container">
             <motion.div
               className="progress-bar"
@@ -133,7 +133,7 @@ export function ControlsPanel(props: ControlsPanelProps) {
         </div>
         {props.encodedSize !== null && (
           <div className="midi-info">
-            {props.encodedFormat}: {props.encodedSize.toLocaleString()} BYTES
+            {props.encodedFormat}: {props.encodedSize.toLocaleString()} バイト
           </div>
         )}
       </Panel>

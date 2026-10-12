@@ -31,7 +31,7 @@ function App() {
   const visualizerRef = useRef<VisualizerHandle>(null);
   const [source, setSource] = useState(SAMPLE_CODE);
   const [extension, setExtension] = useState(".rs");
-  const [status, setStatus] = useState("Initializing WASM...");
+  const [status, setStatus] = useState("エンジンを読み込み中…");
   const [uiMode, setUiMode] = useState<"encode" | "decode">("encode");
   const [payload, setPayload] = useState<PayloadSelection>("source-file");
   const [mode, setMode] = useState<ModeSelection>("auto");
@@ -65,7 +65,7 @@ function App() {
   const initialize = entropy.initialize;
 
   useEffect(() => {
-    void initialize().then(() => setStatus("READY"));
+    void initialize().then(() => setStatus("準備完了"));
   }, [initialize]);
 
   const imports = usePayloadImport({
@@ -121,15 +121,15 @@ function App() {
 
   const handlePlay = async () => {
     if (!encodedData || playing) return;
-    setStatus("PLAYING...");
+    setStatus("再生中…");
     setDelivered(true);
     if (isAcoustic) {
       try {
         await wavPlayback.play(encodedData, () =>
-          setStatus("✅ WAV PLAYBACK COMPLETE"),
+          setStatus("✅ 再生が終わりました"),
         );
       } catch {
-        setStatus("❌ WAV PLAYBACK FAILED");
+        setStatus("❌ 再生できませんでした");
       }
       return;
     }
@@ -144,22 +144,24 @@ function App() {
   };
 
   const verifyPlayback = (midi: Uint8Array) => {
-    if (isProject) return setStatus("✅ PLAYBACK COMPLETE");
-    setStatus("DECODING...");
+    if (isProject) return setStatus("✅ 再生が終わりました");
+    setStatus("復元を確認中…");
     try {
       const decoded = isText
         ? entropy.decodeText(midi)
         : entropy.decodeSourceFile(midi);
-      setStatus(decoded !== null ? "✅ VERIFIED" : "❌ DECODING FAILED");
+      setStatus(
+        decoded !== null ? "✅ 復元を確認しました" : "❌ 復元できませんでした",
+      );
     } catch {
-      setStatus("❌ DECODING FAILED");
+      setStatus("❌ 復元できませんでした");
     }
   };
 
   const handleStop = () => {
     audio.stop();
     wavPlayback.stop();
-    setStatus("STOPPED");
+    setStatus("停止しました");
   };
 
   const handleDownload = () => {
@@ -171,12 +173,12 @@ function App() {
       `${filename}.${isAcoustic ? "wav" : "mid"}`,
     );
     setDelivered(true);
-    setStatus(`${encodedFormat} DOWNLOADED`);
+    setStatus(`${encodedFormat}をダウンロードしました`);
   };
 
   const handleDownloadZip = async () => {
     if (!isProject || projectFiles.length === 0) return;
-    setStatus("CREATING ZIP...");
+    setStatus("ZIPを作成中…");
     try {
       const { default: JSZip } = await import("jszip");
       const zip = new JSZip();
@@ -185,16 +187,16 @@ function App() {
         await zip.generateAsync({ type: "blob" }),
         `${filename}_source.zip`,
       );
-      setStatus("✅ ZIP DOWNLOADED");
+      setStatus("✅ ZIPをダウンロードしました");
     } catch {
-      setStatus("❌ ZIP CREATION FAILED");
+      setStatus("❌ ZIPを作成できませんでした");
     }
   };
 
   const selectPayload = (selection: PayloadSelection) => {
     setPayload(selection);
     setUiMode("encode");
-    setStatus(selection === "text" ? "V2 TEXT READY" : "READY");
+    setStatus(selection === "text" ? "準備完了" : "準備完了");
   };
 
   const selectMode = (selection: ModeSelection) => {
@@ -204,10 +206,10 @@ function App() {
     setProjectVerified(false);
     setStatus(
       selection === "secure"
-        ? "SECURE WAV READY"
+        ? "準備完了（暗号化 WAV）"
         : selection === "reliable"
-          ? "RELIABLE WAV READY"
-          : "READY",
+          ? "準備完了（空気伝送 WAV）"
+          : "準備完了",
     );
   };
 
@@ -222,7 +224,7 @@ function App() {
     setProjectVerified(false);
     setRestored(false);
     setDelivered(false);
-    setStatus("DEMO LOADED — PRESS ENCODE");
+    setStatus("デモを読み込みました。「変換する」を押してください");
   };
 
   return (

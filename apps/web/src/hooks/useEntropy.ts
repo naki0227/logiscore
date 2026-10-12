@@ -87,7 +87,10 @@ export function useEntropy() {
         v2Version,
       }));
     } catch (e) {
-      setState((prev) => ({ ...prev, error: `WASM init failed: ${e}` }));
+      setState((prev) => ({
+        ...prev,
+        error: `エンジンを読み込めませんでした: ${e}`,
+      }));
     }
   }, []);
 
@@ -116,7 +119,7 @@ export function useEntropy() {
         setState((prev) => ({
           ...prev,
           processing: false,
-          error: `Project encode failed: ${e}`,
+          error: `プロジェクトを変換できませんでした: ${e}`,
         }));
         return null;
       }
@@ -140,7 +143,7 @@ export function useEntropy() {
       setState((prev) => ({
         ...prev,
         processing: false,
-        error: `Text encode failed: ${cause}`,
+        error: `テキストを変換できませんでした: ${cause}`,
       }));
       return null;
     }
@@ -166,7 +169,7 @@ export function useEntropy() {
         setState((prev) => ({
           ...prev,
           processing: false,
-          error: `Source File encode failed: ${cause}`,
+          error: `ソースファイルを変換できませんでした: ${cause}`,
         }));
         return null;
       }
@@ -210,7 +213,7 @@ export function useEntropy() {
       setState((prev) => ({
         ...prev,
         processing: false,
-        error: `Text decode failed: ${cause}`,
+        error: `テキストを復元できませんでした: ${cause}`,
       }));
       throw cause;
     }
@@ -232,7 +235,7 @@ export function useEntropy() {
       setState((prev) => ({
         ...prev,
         processing: false,
-        error: `Source File decode failed: ${cause}`,
+        error: `ソースファイルを復元できませんでした: ${cause}`,
       }));
       throw cause;
     }

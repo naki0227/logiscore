@@ -10,10 +10,12 @@ test("Opus recording restores the original v2 Text payload through Web Audio", a
     "fixtures/logiscore-opus.ogg",
   );
   await page.goto("/");
-  await expect(page.getByRole("status")).toHaveText("READY");
-  await page.getByLabel("Import file").setInputFiles(fixturePath);
-  await expect(page.getByRole("status")).toHaveText("✅ V2 TEXT IMPORTED");
-  await expect(page.getByLabel("Decoded source")).toHaveValue("Opus");
+  await expect(page.getByRole("status")).toHaveText("準備完了");
+  await page.getByLabel("ファイルを読み込む").setInputFiles(fixturePath);
+  await expect(page.getByRole("status")).toHaveText(
+    "✅ テキストを復元しました",
+  );
+  await expect(page.getByLabel("復元したデータ")).toHaveValue("Opus");
 
   const metrics = await measureRecordingFixture(page, fixturePath, "Opus");
   expect(metrics.profileId).toBe(7);

@@ -4,7 +4,7 @@ test("two-loop Text recording recovers from an arbitrary chunk position", async 
   page,
 }) => {
   await page.goto("/");
-  await expect(page.getByRole("status")).toHaveText("READY");
+  await expect(page.getByRole("status")).toHaveText("準備完了");
 
   const result = await page.evaluate(async () => {
     const moduleUrl = "/src/lib/acoustic-codec.ts";
@@ -27,7 +27,7 @@ test("two-loop Text recording recovers from an arbitrary chunk position", async 
 
 test("incomplete checkpoint recording is rejected", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("status")).toHaveText("READY");
+  await expect(page.getByRole("status")).toHaveText("準備完了");
 
   const outcome = await page.evaluate(async () => {
     const moduleUrl = "/src/lib/acoustic-codec.ts";
@@ -51,7 +51,7 @@ test("three differently damaged loops recover by symbol confidence", async ({
   page,
 }) => {
   await page.goto("/");
-  await expect(page.getByRole("status")).toHaveText("READY");
+  await expect(page.getByRole("status")).toHaveText("準備完了");
 
   const result = await page.evaluate(async () => {
     const moduleUrl = "/src/lib/acoustic-codec.ts";

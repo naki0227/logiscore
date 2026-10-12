@@ -36,7 +36,7 @@ export function OutputPanel(props: OutputPanelProps) {
 function EncodedOutput(props: OutputPanelProps) {
   return (
     <Panel
-      title={`${props.encodedFormat} OUTPUT`}
+      title={`出力 (${props.encodedFormat})`}
       className="output-panel"
       verified={props.verified}
     >
@@ -50,26 +50,26 @@ function EncodedOutput(props: OutputPanelProps) {
               exit={{ opacity: 0, scale: 0.9 }}
               className="midi-card"
             >
-              <div className="midi-card-icon">🎼</div>
+              <div className="midi-card-icon">♪</div>
               <div className="midi-card-info">
                 <div className="midi-filename">
                   {props.filename}.{props.encodedFormat.toLowerCase()}
                 </div>
                 <div className="midi-filesize">
-                  {props.encodedData.length.toLocaleString()} BYTES
+                  {props.encodedData.length.toLocaleString()} バイト
                 </div>
               </div>
               <button className="btn-download-main" onClick={props.onDownload}>
-                DOWNLOAD {props.encodedFormat}
+                {props.encodedFormat}をダウンロード
               </button>
               <div className="verification-status">
                 {(props.isProject ? props.projectVerified : props.verified)
-                  ? "✅ LOSSLESS VERIFIED"
-                  : "... UNVERIFIED"}
+                  ? "✅ 完全に復元できることを確認済み"
+                  : "未確認"}
               </div>
               {props.decodedSource && (
                 <div className="mini-preview">
-                  <div className="preview-header">DECODED VERIFICATION</div>
+                  <div className="preview-header">復元結果のプレビュー</div>
                   <pre className="preview-content">
                     {props.decodedSource.slice(0, 100)}...
                   </pre>
@@ -83,8 +83,8 @@ function EncodedOutput(props: OutputPanelProps) {
               animate={{ opacity: 1 }}
               className="midi-placeholder"
             >
-              <div className="placeholder-icon">🎵</div>
-              <p>Press ENCODE to create a {props.encodedFormat} file</p>
+              <div className="placeholder-icon">♪</div>
+              <p>「変換する」を押すと{props.encodedFormat}ファイルができます</p>
             </motion.div>
           )}
         </AnimatePresence>
@@ -96,14 +96,14 @@ function EncodedOutput(props: OutputPanelProps) {
 function DecodedOutput(props: OutputPanelProps) {
   return (
     <Panel
-      title="DECODED SOURCE"
+      title="復元結果"
       className="editor-panel"
       verified={props.verified}
       headerAction={
         <button
           className="btn-icon"
           onClick={props.onDownload}
-          title={`Download ${props.encodedFormat}`}
+          title={`${props.encodedFormat}をダウンロード`}
         >
           <Icons.Download />
         </button>
@@ -111,7 +111,7 @@ function DecodedOutput(props: OutputPanelProps) {
     >
       <textarea
         className="code-input"
-        aria-label="Decoded source"
+        aria-label="復元したデータ"
         value={props.source}
         onChange={(event) => props.onSourceChange(event.target.value)}
         spellCheck={false}

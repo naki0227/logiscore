@@ -1,5 +1,6 @@
 import {
   formatDuration,
+  profileLabel,
   type AcousticEnvironment,
   type AcousticProfileDescription,
 } from "./model";
@@ -14,28 +15,28 @@ interface AcousticProfileControlsProps {
 
 export function AcousticProfileControls(props: AcousticProfileControlsProps) {
   return (
-    <div className="acoustic-profile" aria-label="Acoustic profile settings">
+    <div className="acoustic-profile" aria-label="音響プロファイル設定">
       <label>
-        <span>Environment</span>
+        <span>環境</span>
         <select
-          aria-label="Environment"
+          aria-label="環境"
           value={props.environment}
           onChange={(event) =>
             props.onEnvironmentChange(event.target.value as AcousticEnvironment)
           }
         >
-          <option value="auto">Auto</option>
-          <option value="quiet">Quiet</option>
-          <option value="conversation">Conversation</option>
-          <option value="noisy">Noisy</option>
-          <option value="online">Online</option>
-          <option value="long-distance">Long Distance</option>
+          <option value="auto">おまかせ</option>
+          <option value="quiet">静かな部屋</option>
+          <option value="conversation">会話がある</option>
+          <option value="noisy">騒がしい</option>
+          <option value="online">オンライン通話</option>
+          <option value="long-distance">離れた距離</option>
         </select>
       </label>
       <label className="priority-control">
-        <span>Priority</span>
+        <span>速さ ↔ 確実さ</span>
         <input
-          aria-label="Reliability priority"
+          aria-label="信頼性の優先度"
           type="range"
           min="0"
           max="100"
@@ -44,18 +45,21 @@ export function AcousticProfileControls(props: AcousticProfileControlsProps) {
             props.onPriorityChange(Number(event.target.value))
           }
         />
-        <div className="priority-value" aria-label="Reliability priority value">
-          {props.reliabilityPriority}% reliability
+        <div className="priority-value" aria-label="信頼性の優先度の値">
+          確実さ {props.reliabilityPriority}%
         </div>
       </label>
       <div className="profile-summary" aria-live="polite">
-        <ProfileValue label="Profile" value={props.profile?.name ?? "—"} />
         <ProfileValue
-          label="Confidence"
+          label="プロファイル"
+          value={props.profile ? profileLabel(props.profile) : "—"}
+        />
+        <ProfileValue
+          label="推定の確かさ"
           value={props.profile ? `${props.profile.confidence_percent}%` : "—"}
         />
         <ProfileValue
-          label="Estimated Duration"
+          label="予想再生時間"
           value={formatDuration(props.profile?.estimated_duration_ms ?? NaN)}
         />
       </div>

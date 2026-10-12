@@ -18,23 +18,23 @@ const STEPS: { key: keyof QuickStartProgress; title: string; body: string }[] =
   [
     {
       key: "hasInput",
-      title: "Write",
-      body: "Type a message, paste code, or drop a project folder.",
+      title: "書く",
+      body: "メッセージを入力するか、コードやプロジェクトフォルダを読み込みます。",
     },
     {
       key: "encoded",
-      title: "Encode",
-      body: "Press ENCODE to turn it into music (MIDI or WAV).",
+      title: "変換する",
+      body: "「変換する」を押すと、音楽（MIDIまたはWAV）になります。",
     },
     {
       key: "played",
-      title: "Play & record",
-      body: "Press PLAY out loud and record it on another device, or download the file.",
+      title: "再生して録音",
+      body: "「再生」で音を鳴らし、別の端末で録音します。ファイルとして保存しても構いません。",
     },
     {
       key: "restored",
-      title: "Restore",
-      body: "Import the recording or file with the import button to get the original back.",
+      title: "復元する",
+      body: "録音やファイルを読み込むと、元のデータに戻ります。",
     },
   ];
 
@@ -70,7 +70,7 @@ export function QuickStartGuide({
           setDismissed(false);
         }}
       >
-        How does it work?
+        使い方を見る
       </button>
     );
   }
@@ -78,18 +78,18 @@ export function QuickStartGuide({
   const current = STEPS.findIndex((step) => !progress[step.key]);
 
   return (
-    <section className="quickstart" aria-label="Quick start">
+    <section className="quickstart" aria-label="はじめに">
       <div className="quickstart-intro">
-        <h1 className="quickstart-title">Send data with sound</h1>
+        <p className="quickstart-eyebrow">Code / Browser / Sound</p>
+        <h1 className="quickstart-title">
+          データを<em>音にして</em>送る
+        </h1>
         <p className="quickstart-lead">
-          Logiscore turns text, source code, or a whole project into music. Play
-          it out loud, record it on another device, and import the recording to
-          get the exact original back. Everything runs in your browser — nothing
-          is uploaded.
+          テキスト、ソースコード、プロジェクトを音楽に変換します。スピーカーで鳴らして別の端末で録音し、その録音を読み込むと元のデータがそのまま戻ります。処理はすべてブラウザの中で行われ、データはどこにも送信されません。
         </p>
         <div className="quickstart-actions">
           <button className="btn quickstart-demo" onClick={onLoadDemo}>
-            Try the over-the-air demo
+            空気伝送のデモを試す
           </button>
           <button
             className="quickstart-dismiss"
@@ -98,7 +98,7 @@ export function QuickStartGuide({
               setDismissed(true);
             }}
           >
-            Hide guide
+            ガイドを閉じる
           </button>
         </div>
       </div>
