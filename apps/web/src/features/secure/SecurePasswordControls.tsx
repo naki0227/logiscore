@@ -11,9 +11,9 @@ interface SecurePasswordControlsProps {
 export function SecurePasswordControls(props: SecurePasswordControlsProps) {
   return (
     <fieldset className="secure-password-controls">
-      <legend>Secure Password</legend>
+      <legend>暗号化パスワード</legend>
       <label>
-        <span>Password</span>
+        <span>パスワード</span>
         <input
           type="password"
           value={props.password}
@@ -22,7 +22,7 @@ export function SecurePasswordControls(props: SecurePasswordControlsProps) {
         />
       </label>
       <label>
-        <span>Confirm Password</span>
+        <span>パスワード（確認）</span>
         <input
           type="password"
           value={props.confirmation}
@@ -34,9 +34,11 @@ export function SecurePasswordControls(props: SecurePasswordControlsProps) {
         className={props.validation.valid ? "secure-valid" : "secure-invalid"}
         aria-live="polite"
       >
-        {props.validation.message} ({props.validation.byteLength}/1024 bytes)
+        {props.validation.message} （{props.validation.byteLength}/1024 バイト）
       </div>
-      <small>Password is kept only in this browser tab's memory.</small>
+      <small>
+        パスワードはこのタブのメモリにだけ保持され、保存も送信もされません。
+      </small>
     </fieldset>
   );
 }

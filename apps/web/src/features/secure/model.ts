@@ -12,17 +12,21 @@ export function validateSecurePassword(
 ): SecurePasswordState {
   const byteLength = new TextEncoder().encode(password).length;
   if (byteLength === 0) {
-    return { byteLength, valid: false, message: "Password is required" };
+    return {
+      byteLength,
+      valid: false,
+      message: "パスワードを入力してください",
+    };
   }
   if (byteLength > MAX_PASSWORD_BYTES) {
     return {
       byteLength,
       valid: false,
-      message: `Password must be at most ${MAX_PASSWORD_BYTES} UTF-8 bytes`,
+      message: `パスワードは${MAX_PASSWORD_BYTES}バイト（UTF-8）以内にしてください`,
     };
   }
   if (password !== confirmation) {
-    return { byteLength, valid: false, message: "Passwords do not match" };
+    return { byteLength, valid: false, message: "パスワードが一致しません" };
   }
-  return { byteLength, valid: true, message: "Passwords match" };
+  return { byteLength, valid: true, message: "パスワードが一致しました" };
 }

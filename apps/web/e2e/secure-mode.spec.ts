@@ -5,11 +5,11 @@ const PASSWORD = "correct horse 電池 staple";
 
 async function openSecureApp(page: Page, payload = "text") {
   await page.goto("/");
-  await expect(page.getByRole("status")).toHaveText("READY");
-  await page.getByLabel("Payload").selectOption(payload);
-  await page.getByLabel("Mode").selectOption("secure");
-  await page.getByLabel("Password", { exact: true }).fill(PASSWORD);
-  await page.getByLabel("Confirm Password").fill(PASSWORD);
+  await expect(page.getByRole("status")).toHaveText("準備完了");
+  await page.getByLabel(/^送るもの/).selectOption(payload);
+  await page.getByLabel(/^モード/).selectOption("secure");
+  await page.getByLabel("パスワード", { exact: true }).fill(PASSWORD);
+  await page.getByLabel("パスワード（確認）").fill(PASSWORD);
 }
 
 test.describe("Logiscore v2 Secure Mode scenarios", () => {
@@ -19,20 +19,20 @@ test.describe("Logiscore v2 Secure Mode scenarios", () => {
     page,
   }) => {
     await page.goto("/");
-    await expect(page.getByRole("status")).toHaveText("READY");
-    await page.getByLabel("Mode").selectOption("secure");
+    await expect(page.getByRole("status")).toHaveText("準備完了");
+    await page.getByLabel(/^モード/).selectOption("secure");
     await expect(page.locator(".codec-protocol")).toHaveText(
       "V2 / PCM + AEAD + FEC",
     );
-    const encode = page.getByRole("button", { name: "ENCODE" });
+    const encode = page.getByRole("button", { name: "変換する" });
     await expect(encode).toBeDisabled();
-    await page.getByLabel("Password", { exact: true }).fill(PASSWORD);
-    await page.getByLabel("Confirm Password").fill("wrong");
+    await page.getByLabel("パスワード", { exact: true }).fill(PASSWORD);
+    await page.getByLabel("パスワード（確認）").fill("wrong");
     await expect(page.locator(".secure-invalid")).toContainText(
-      "Passwords do not match",
+      "パスワードが一致しません",
     );
     await expect(encode).toBeDisabled();
-    await page.getByLabel("Confirm Password").fill(PASSWORD);
+    await page.getByLabel("パスワード（確認）").fill(PASSWORD);
     await expect(encode).toBeEnabled();
     expect(await page.evaluate(() => localStorage.length)).toBe(0);
     expect(await page.evaluate(() => sessionStorage.length)).toBe(0);
@@ -43,43 +43,45 @@ test.describe("Logiscore v2 Secure Mode scenarios", () => {
   }) => {
     const secret = "Playwrightだけが復号する秘密 🔐";
     await openSecureApp(page);
-    await page.getByLabel("Text payload").fill(secret);
-    await page.getByRole("button", { name: "ENCODE" }).click();
+    await page.getByLabel("送るテキスト").fill(secret);
+    await page.getByRole("button", { name: "変換する" }).click();
     await expect(page.getByRole("status")).toContainText(
-      "V2 SECURE TEXT VERIFIED",
+      "テキストを暗号化 WAVに変換しました",
     );
 
     const downloadPromise = page.waitForEvent("download");
-    await page.getByRole("button", { name: "DOWNLOAD WAV" }).click();
+    await page.getByRole("button", { name: "WAVをダウンロード" }).click();
     const download = await downloadPromise;
     const downloadedPath = await download.path();
     if (!downloadedPath) throw new Error("WAV download path is unavailable");
     const wav = await readFile(downloadedPath);
 
-    await page.getByLabel("Text payload").fill("redacted before import");
-    await page.getByLabel("Password", { exact: true }).fill("wrong password");
-    await page.getByLabel("Confirm Password").fill("wrong password");
-    await page.getByLabel("Import file").setInputFiles({
+    await page.getByLabel("送るテキスト").fill("redacted before import");
+    await page.getByLabel("パスワード", { exact: true }).fill("wrong password");
+    await page.getByLabel("パスワード（確認）").fill("wrong password");
+    await page.getByLabel("ファイルを読み込む").setInputFiles({
       name: "secure.wav",
       mimeType: "audio/wav",
       buffer: wav,
     });
     await expect(page.getByRole("status")).toHaveText(
-      "⚠️ Unsupported or damaged Logiscore recording",
+      "⚠️ Logiscoreの録音として認識できませんでした",
     );
     await expect(page.locator("body")).not.toContainText(secret);
     await expect(page.locator("body")).not.toContainText("Argon2");
     await expect(page.locator("body")).not.toContainText("ChaCha");
 
-    await page.getByLabel("Password", { exact: true }).fill(PASSWORD);
-    await page.getByLabel("Confirm Password").fill(PASSWORD);
-    await page.getByLabel("Import file").setInputFiles({
+    await page.getByLabel("パスワード", { exact: true }).fill(PASSWORD);
+    await page.getByLabel("パスワード（確認）").fill(PASSWORD);
+    await page.getByLabel("ファイルを読み込む").setInputFiles({
       name: "secure-again.wav",
       mimeType: "audio/wav",
       buffer: wav,
     });
-    await expect(page.getByRole("status")).toHaveText("✅ V2 TEXT IMPORTED");
-    await expect(page.getByLabel("Decoded source")).toHaveValue(secret);
+    await expect(page.getByRole("status")).toHaveText(
+      "✅ テキストを復元しました",
+    );
+    await expect(page.getByLabel("復元したデータ")).toHaveValue(secret);
   });
 
   test("browser WASM randomizes ciphertext and roundtrips every Secure payload", async ({

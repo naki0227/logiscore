@@ -49,7 +49,7 @@ export function AppHeader({
         {projectFileCount !== null && (
           <div className="project-badge">
             <Icons.Node />
-            <span>{projectFileCount} FILES</span>
+            <span>{projectFileCount} ファイル</span>
           </div>
         )}
         <div className="filename-badge">

@@ -35,7 +35,7 @@ export function useAcousticCodec() {
       setWavData(wav);
       return wav;
     } catch {
-      setError("Audio encode failed");
+      setError("音声への変換に失敗しました");
       return null;
     } finally {
       setProcessing(false);
@@ -107,7 +107,7 @@ export function useAcousticCodec() {
       }
       return decoded;
     } catch {
-      setError("Audio decode failed");
+      setError("録音から復元できませんでした");
       throw new Error("Audio decode failed");
     } finally {
       setProcessing(false);

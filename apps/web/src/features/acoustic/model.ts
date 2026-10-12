@@ -36,12 +36,27 @@ export function parseProfileDescription(
   return value;
 }
 
+const PROFILE_LABELS: Record<number, string> = {
+  1: "静かな部屋向け",
+  2: "標準",
+  3: "会話向け",
+  4: "騒音向け",
+  5: "オンライン通話向け",
+  6: "遠距離向け",
+  7: "最も確実（単音）",
+};
+
+/** WASM が返す英語のプロファイル名を、画面表示用の日本語に置き換える */
+export function profileLabel(profile: AcousticProfileDescription): string {
+  return PROFILE_LABELS[profile.id] ?? profile.name;
+}
+
 export function formatDuration(milliseconds: number): string {
   if (!Number.isFinite(milliseconds) || milliseconds < 0) return "—";
   const seconds = Math.ceil(milliseconds / 1_000);
-  if (seconds < 60) return `${seconds} sec`;
+  if (seconds < 60) return `${seconds}秒`;
   const minutes = Math.floor(seconds / 60);
-  return `${minutes} min ${seconds % 60} sec`;
+  return `${minutes}分${seconds % 60}秒`;
 }
 
 function isProfile(

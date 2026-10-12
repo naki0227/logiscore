@@ -49,12 +49,12 @@ export function createEncodingActions(options: EncodingOptions) {
         options.setProjectVerified(matched);
         options.setStatus(
           matched
-            ? `✅ ${options.securePassword ? "SECURE" : "RELIABLE"} SYMPHONY VERIFIED: 100% BIT-PERFECT`
-            : "⚠️ ACOUSTIC PROJECT VERIFICATION FAILED",
+            ? `✅ プロジェクトを${options.securePassword ? "暗号化" : "空気伝送"} WAVに変換し、完全に復元できることを確認しました`
+            : "⚠️ プロジェクトの復元確認に失敗しました",
         );
       } catch {
         options.setProjectVerified(false);
-        options.setStatus("⚠️ ACOUSTIC PROJECT VERIFICATION FAILED");
+        options.setStatus("⚠️ プロジェクトの復元確認に失敗しました");
       }
       return;
     }
@@ -63,7 +63,9 @@ export function createEncodingActions(options: EncodingOptions) {
       musical,
     );
     if (!midi) return;
-    options.setStatus(`SYMPHONY CREATED: ${midi.length} BYTES`);
+    options.setStatus(
+      `プロジェクトをMIDIに変換しました: ${midi.length.toLocaleString()} バイト`,
+    );
     setTimeout(() => {
       try {
         const decoded = options.entropy.decodeProjectSource(midi);
@@ -73,19 +75,19 @@ export function createEncodingActions(options: EncodingOptions) {
         options.setProjectVerified(matched);
         options.setStatus(
           matched
-            ? "✅ SYMPHONY VERIFIED: 100% BIT-PERFECT"
-            : "⚠️ VERIFICATION FAILED: CONTENT MISMATCH",
+            ? "✅ プロジェクトを完全に復元できることを確認しました"
+            : "⚠️ 復元結果が元のデータと一致しません",
         );
       } catch {
         options.setProjectVerified(false);
-        options.setStatus("⚠️ PROJECT VERIFICATION FAILED");
+        options.setStatus("⚠️ プロジェクトの復元確認に失敗しました");
       }
     }, 100);
   };
 
   const handleEncode = () => {
     if (!options.ready || options.playing) return;
-    options.setStatus("ENCODING...");
+    options.setStatus("変換中…");
     const route = resolveCodecRoute(options.payload, options.mode);
     const reliable = route.endsWith("-reliable");
     const secure = route.endsWith("-secure");
@@ -122,12 +124,12 @@ export function createEncodingActions(options: EncodingOptions) {
         options.setAcousticVerified(matched);
         options.setStatus(
           matched
-            ? `✅ V2 ${secure ? "SECURE" : "RELIABLE"} ${options.payload === "text" ? "TEXT" : "SOURCE FILE"} VERIFIED: ${wav.length} BYTES`
-            : "⚠️ ACOUSTIC VERIFICATION FAILED",
+            ? `✅ ${options.payload === "text" ? "テキスト" : "ソースファイル"}を${secure ? "暗号化" : "空気伝送"} WAVに変換しました（${wav.length.toLocaleString()} バイト・復元確認済み）`
+            : "⚠️ 復元確認に失敗しました",
         );
       } catch {
         options.setAcousticVerified(false);
-        options.setStatus("⚠️ ACOUSTIC VERIFICATION FAILED");
+        options.setStatus("⚠️ 復元確認に失敗しました");
       }
       return;
     }
@@ -141,7 +143,7 @@ export function createEncodingActions(options: EncodingOptions) {
         );
     if (midi) {
       options.setStatus(
-        `V2 ${musical ? "MUSICAL " : ""}${route.startsWith("v2-text-") ? "TEXT" : "SOURCE FILE"} ENCODED: ${midi.length} BYTES`,
+        `${route.startsWith("v2-text-") ? "テキスト" : "ソースファイル"}を${musical ? "音楽的な" : ""}MIDIに変換しました: ${midi.length.toLocaleString()} バイト`,
       );
     }
   };

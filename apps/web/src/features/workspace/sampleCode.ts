@@ -5,5 +5,4 @@ export const SAMPLE_CODE = `fn main() {
 }
 `;
 
-export const SAMPLE_TEXT =
-  "Hello from Logiscore! This message travelled through the air as sound.";
+export const SAMPLE_TEXT = "Logiscoreからこんにちは！音で届きました。";

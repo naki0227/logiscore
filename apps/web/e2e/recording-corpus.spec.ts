@@ -70,14 +70,17 @@ for (const entry of corpus.entries) {
     page,
   }) => {
     await page.goto("/");
-    await expect(page.getByRole("status")).toHaveText("READY");
+    await expect(page.getByRole("status")).toHaveText("準備完了");
     await page
-      .getByLabel("Import file")
+      .getByLabel("ファイルを読み込む")
       .setInputFiles(path.join(corpusRoot, entry.transmissionFile));
-    await expect(page.getByRole("status")).toHaveText("✅ V2 TEXT IMPORTED", {
-      timeout: 15_000,
-    });
-    await expect(page.getByLabel("Decoded source")).toHaveValue(entry.text);
+    await expect(page.getByRole("status")).toHaveText(
+      "✅ テキストを復元しました",
+      {
+        timeout: 15_000,
+      },
+    );
+    await expect(page.getByLabel("復元したデータ")).toHaveValue(entry.text);
     const metrics = await measureRecordingFixture(
       page,
       path.join(corpusRoot, entry.transmissionFile),
@@ -103,14 +106,13 @@ for (const entry of corpus.entries.filter(
   }, testInfo) => {
     expect(fixtureSha256(recordingFile)).toBe(entry.recordingSha256);
     await page.goto("/");
-    await expect(page.getByRole("status")).toHaveText("READY");
+    await expect(page.getByRole("status")).toHaveText("準備完了");
     await page
-      .getByLabel("Import file")
+      .getByLabel("ファイルを読み込む")
       .setInputFiles(path.join(corpusRoot, recordingFile));
-    await expect(page.getByRole("status")).not.toHaveText(
-      "IMPORTING RECORDING...",
-      { timeout: 15_000 },
-    );
+    await expect(page.getByRole("status")).not.toHaveText("録音を解析中…", {
+      timeout: 15_000,
+    });
     const metrics = await measureRecordingFixture(
       page,
       path.join(corpusRoot, recordingFile),
@@ -124,8 +126,10 @@ for (const entry of corpus.entries.filter(
       `recording measurement ${entry.id}: ${JSON.stringify(metrics)}`,
     );
     if (entry.status === "verified" && entry.measurement) {
-      await expect(page.getByRole("status")).toHaveText("✅ V2 TEXT IMPORTED");
-      await expect(page.getByLabel("Decoded source")).toHaveValue(entry.text);
+      await expect(page.getByRole("status")).toHaveText(
+        "✅ テキストを復元しました",
+      );
+      await expect(page.getByLabel("復元したデータ")).toHaveValue(entry.text);
       expect(metrics.finalRecoveryRatePercent).toBe(
         entry.measurement.finalRecoveryRatePercent,
       );
