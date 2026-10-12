@@ -1,3 +1,4 @@
+import type { SetStatus } from "../status/model";
 import type { ProjectFile, useEntropy } from "../../hooks/useEntropy";
 import type { useAcousticCodec } from "../../hooks/useAcousticCodec";
 import { areProjectFilesEqual, resolveCodecRoute } from "./model";
@@ -26,7 +27,7 @@ interface EncodingOptions {
     ReturnType<typeof useAcousticCodec>,
     "encodeText" | "encodeSourceFile" | "encodeProject" | "decodeWav"
   >;
-  setStatus: (status: string) => void;
+  setStatus: SetStatus;
   setAcousticVerified: (verified: boolean) => void;
   setProjectVerified: (verified: boolean) => void;
 }
@@ -49,12 +50,13 @@ export function createEncodingActions(options: EncodingOptions) {
         options.setProjectVerified(matched);
         options.setStatus(
           matched
-            ? `✅ プロジェクトを${options.securePassword ? "暗号化" : "空気伝送"} WAVに変換し、完全に復元できることを確認しました`
-            : "⚠️ プロジェクトの復元確認に失敗しました",
+            ? `プロジェクトを${options.securePassword ? "暗号化" : "空気伝送"} WAVに変換し、完全に復元できることを確認しました`
+            : "プロジェクトの復元確認に失敗しました",
+          matched ? "success" : "error",
         );
       } catch {
         options.setProjectVerified(false);
-        options.setStatus("⚠️ プロジェクトの復元確認に失敗しました");
+        options.setStatus("プロジェクトの復元確認に失敗しました", "error");
       }
       return;
     }
@@ -75,12 +77,13 @@ export function createEncodingActions(options: EncodingOptions) {
         options.setProjectVerified(matched);
         options.setStatus(
           matched
-            ? "✅ プロジェクトを完全に復元できることを確認しました"
-            : "⚠️ 復元結果が元のデータと一致しません",
+            ? "プロジェクトを完全に復元できることを確認しました"
+            : "復元結果が元のデータと一致しません",
+          matched ? "success" : "error",
         );
       } catch {
         options.setProjectVerified(false);
-        options.setStatus("⚠️ プロジェクトの復元確認に失敗しました");
+        options.setStatus("プロジェクトの復元確認に失敗しました", "error");
       }
     }, 100);
   };
@@ -124,12 +127,13 @@ export function createEncodingActions(options: EncodingOptions) {
         options.setAcousticVerified(matched);
         options.setStatus(
           matched
-            ? `✅ ${options.payload === "text" ? "テキスト" : "ソースファイル"}を${secure ? "暗号化" : "空気伝送"} WAVに変換しました（${wav.length.toLocaleString()} バイト・復元確認済み）`
-            : "⚠️ 復元確認に失敗しました",
+            ? `${options.payload === "text" ? "テキスト" : "ソースファイル"}を${secure ? "暗号化" : "空気伝送"} WAVに変換しました（${wav.length.toLocaleString()} バイト・復元確認済み）`
+            : "復元確認に失敗しました",
+          matched ? "success" : "error",
         );
       } catch {
         options.setAcousticVerified(false);
-        options.setStatus("⚠️ 復元確認に失敗しました");
+        options.setStatus("復元確認に失敗しました", "error");
       }
       return;
     }

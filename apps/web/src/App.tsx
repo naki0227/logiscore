@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Visualizer, { type VisualizerHandle } from "./components/Visualizer";
 import { useAudioEngine } from "./hooks/useAudioEngine";
 import { useAcousticCodec } from "./hooks/useAcousticCodec";
@@ -20,6 +19,7 @@ import { SourcePanel } from "./features/workspace/SourcePanel";
 import { QuickStartGuide } from "./features/workspace/QuickStartGuide";
 import { downloadBlob } from "./lib/downloadBlob";
 import { SAMPLE_CODE, SAMPLE_TEXT } from "./features/workspace/sampleCode";
+import type { SetStatus, StatusMessage } from "./features/status/model";
 import "./App.css";
 
 function App() {
@@ -31,7 +31,14 @@ function App() {
   const visualizerRef = useRef<VisualizerHandle>(null);
   const [source, setSource] = useState(SAMPLE_CODE);
   const [extension, setExtension] = useState(".rs");
-  const [status, setStatus] = useState("エンジンを読み込み中…");
+  const [status, setStatusMessage] = useState<StatusMessage>({
+    text: "エンジンを読み込み中…",
+    tone: "neutral",
+  });
+  const setStatus = useCallback<SetStatus>(
+    (text, tone = "neutral") => setStatusMessage({ text, tone }),
+    [],
+  );
   const [uiMode, setUiMode] = useState<"encode" | "decode">("encode");
   const [payload, setPayload] = useState<PayloadSelection>("source-file");
   const [mode, setMode] = useState<ModeSelection>("auto");
@@ -66,7 +73,7 @@ function App() {
 
   useEffect(() => {
     void initialize().then(() => setStatus("準備完了"));
-  }, [initialize]);
+  }, [initialize, setStatus]);
 
   const imports = usePayloadImport({
     ready: entropy.ready,
@@ -126,10 +133,10 @@ function App() {
     if (isAcoustic) {
       try {
         await wavPlayback.play(encodedData, () =>
-          setStatus("✅ 再生が終わりました"),
+          setStatus("再生が終わりました", "success"),
         );
       } catch {
-        setStatus("❌ 再生できませんでした");
+        setStatus("再生できませんでした", "error");
       }
       return;
     }
@@ -144,17 +151,18 @@ function App() {
   };
 
   const verifyPlayback = (midi: Uint8Array) => {
-    if (isProject) return setStatus("✅ 再生が終わりました");
+    if (isProject) return setStatus("再生が終わりました", "success");
     setStatus("復元を確認中…");
     try {
       const decoded = isText
         ? entropy.decodeText(midi)
         : entropy.decodeSourceFile(midi);
       setStatus(
-        decoded !== null ? "✅ 復元を確認しました" : "❌ 復元できませんでした",
+        decoded !== null ? "復元を確認しました" : "復元できませんでした",
+        decoded !== null ? "success" : "error",
       );
     } catch {
-      setStatus("❌ 復元できませんでした");
+      setStatus("復元できませんでした", "error");
     }
   };
 
@@ -187,23 +195,31 @@ function App() {
         await zip.generateAsync({ type: "blob" }),
         `${filename}_source.zip`,
       );
-      setStatus("✅ ZIPをダウンロードしました");
+      setStatus("ZIPをダウンロードしました", "success");
     } catch {
-      setStatus("❌ ZIPを作成できませんでした");
+      setStatus("ZIPを作成できませんでした", "error");
     }
   };
 
+  /** 入力や設定が変わったら、前の変換結果は古くなるので消す */
+  const clearOutput = () => {
+    handleStop();
+    entropy.clearEncoded();
+    acoustic.clear();
+    setAcousticVerified(false);
+    setProjectVerified(false);
+  };
+
   const selectPayload = (selection: PayloadSelection) => {
+    clearOutput();
     setPayload(selection);
     setUiMode("encode");
-    setStatus(selection === "text" ? "準備完了" : "準備完了");
+    setStatus("準備完了");
   };
 
   const selectMode = (selection: ModeSelection) => {
-    handleStop();
+    clearOutput();
     setMode(selection);
-    setAcousticVerified(false);
-    setProjectVerified(false);
     setStatus(
       selection === "secure"
         ? "準備完了（暗号化 WAV）"
@@ -213,8 +229,18 @@ function App() {
     );
   };
 
+  const editSource = (next: string) => {
+    if (encodedData) clearOutput();
+    setSource(next);
+  };
+
+  const selectExtension = (next: string) => {
+    if (encodedData) clearOutput();
+    setExtension(next);
+  };
+
   const loadDemo = () => {
-    handleStop();
+    clearOutput();
     setPayload("text");
     setMode("reliable");
     setSource(SAMPLE_TEXT);
@@ -235,14 +261,10 @@ function App() {
     >
       <AppHeader
         status={status}
-        systemVersion={entropy.systemVersion}
         filename={filename}
         projectFileCount={isProject ? projectFiles.length : null}
       />
       <main className="main">
-        <div className="visualizer-bg">
-          <Visualizer ref={visualizerRef} />
-        </div>
         <QuickStartGuide
           progress={{
             hasInput: isProject ? projectFiles.length > 0 : source.length > 0,
@@ -265,8 +287,8 @@ function App() {
             inputSize={encodedSize ?? 0}
             inputFormat={encodedFormat}
             onPayloadChange={selectPayload}
-            onSourceChange={setSource}
-            onExtensionChange={setExtension}
+            onSourceChange={editSource}
+            onExtensionChange={selectExtension}
             onUiModeChange={setUiMode}
             onImport={imports.handleImport}
             onDownloadZip={handleDownloadZip}
@@ -308,23 +330,17 @@ function App() {
             verified={verified}
             projectVerified={projectVerified}
             isProject={isProject}
+            visualizer={<Visualizer ref={visualizerRef} />}
             onDownload={handleDownload}
             onSourceChange={setSource}
           />
         </div>
       </main>
-      <AnimatePresence>
-        {(entropy.error || acoustic.error) && (
-          <motion.div
-            initial={{ opacity: 0, y: 20, x: "-50%" }}
-            animate={{ opacity: 1, y: 0, x: "-50%" }}
-            exit={{ opacity: 0, y: 20, x: "-50%" }}
-            className="error-toast"
-          >
-            ⚠️ {entropy.error || acoustic.error}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {(entropy.error || acoustic.error) && (
+        <div className="error-toast" role="alert">
+          {entropy.error || acoustic.error}
+        </div>
+      )}
     </div>
   );
 }

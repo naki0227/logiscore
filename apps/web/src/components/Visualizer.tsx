@@ -36,10 +36,8 @@ const Visualizer = forwardRef<VisualizerHandle>((_, ref) => {
       const normalized = (note - 24) / 84;
       const x = (isBass ? 0.1 + (note % 12) / 100 : normalized) * canvas.width;
 
-      // Enludus palette: purple bass, sky/orange melody
-      const colors = isBass
-        ? ["#7268ae", "#5d5396"]
-        : ["#2d9fd6", "#92ddff", "#7268ae", "#ff9b61"];
+      // 低音は濃い色、旋律は薄い色の2色だけで描く
+      const colors = isBass ? ["#5d5396"] : ["#9a93c9"];
 
       const color = colors[Math.floor(Math.random() * colors.length)];
 
@@ -83,8 +81,6 @@ const Visualizer = forwardRef<VisualizerHandle>((_, ref) => {
       for (const p of particlesRef.current) {
         ctx.save();
         ctx.globalAlpha = p.opacity;
-        ctx.shadowBlur = 8;
-        ctx.shadowColor = p.color;
         ctx.fillStyle = p.color;
         // 角丸の矩形
         const r = 4;
@@ -106,7 +102,7 @@ const Visualizer = forwardRef<VisualizerHandle>((_, ref) => {
       <canvas
         ref={canvasRef}
         width={800}
-        height={400}
+        height={160}
         className="visualizer-canvas"
       />
     </div>

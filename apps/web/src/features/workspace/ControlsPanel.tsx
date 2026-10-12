@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { Icons } from "../../components/Icons";
 import Panel from "../../components/Panel";
 import { CodecSelector } from "../codec/CodecSelector";
@@ -52,11 +51,7 @@ const NOTES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
 export function ControlsPanel(props: ControlsPanelProps) {
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay: 0.2 }}
-    >
+    <div>
       <Panel title="操作" className="controls-panel">
         <CodecSelector
           payload={props.payload}
@@ -124,10 +119,9 @@ export function ControlsPanel(props: ControlsPanelProps) {
         <div className="progress-container">
           <div className="progress-label">再生の進み具合</div>
           <div className="progress-bar-container">
-            <motion.div
+            <div
               className="progress-bar"
-              animate={{ width: `${props.progress}%` }}
-              transition={{ type: "spring", bounce: 0, duration: 0.3 }}
+              style={{ width: `${props.progress}%` }}
             />
           </div>
         </div>
@@ -137,7 +131,7 @@ export function ControlsPanel(props: ControlsPanelProps) {
           </div>
         )}
       </Panel>
-    </motion.div>
+    </div>
   );
 }
 

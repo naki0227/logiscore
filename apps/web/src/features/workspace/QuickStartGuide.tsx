@@ -80,10 +80,7 @@ export function QuickStartGuide({
   return (
     <section className="quickstart" aria-label="はじめに">
       <div className="quickstart-intro">
-        <p className="quickstart-eyebrow">Code / Browser / Sound</p>
-        <h1 className="quickstart-title">
-          データを<em>音にして</em>送る
-        </h1>
+        <h1 className="quickstart-title">データを音にして送る</h1>
         <p className="quickstart-lead">
           テキスト、ソースコード、プロジェクトを音楽に変換します。スピーカーで鳴らして別の端末で録音し、その録音を読み込むと元のデータがそのまま戻ります。処理はすべてブラウザの中で行われ、データはどこにも送信されません。
         </p>
@@ -111,11 +108,14 @@ export function QuickStartGuide({
               : "todo";
           return (
             <li key={step.key} className={`quickstart-step ${state}`}>
-              <span className="quickstart-step-number" aria-hidden="true">
-                {state === "done" ? "✓" : index + 1}
-              </span>
+              <span className="quickstart-step-number">{index + 1}.</span>
               <span className="quickstart-step-text">
-                <strong>{step.title}</strong>
+                <strong>
+                  {step.title}
+                  {state === "done" && (
+                    <span className="quickstart-step-done">（済）</span>
+                  )}
+                </strong>
                 <span>{step.body}</span>
               </span>
             </li>

@@ -1,26 +1,19 @@
-import { motion } from "framer-motion";
-import { Icons } from "../../components/Icons";
+import type { StatusMessage } from "../status/model";
 
 interface AppHeaderProps {
-  status: string;
-  systemVersion: string | null;
+  status: StatusMessage;
   filename: string;
   projectFileCount: number | null;
 }
 
 export function AppHeader({
   status,
-  systemVersion,
   filename,
   projectFileCount,
 }: AppHeaderProps) {
   return (
     <header className="header">
-      <motion.div
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        className="logo"
-      >
+      <div className="logo">
         <span className="logo-mark" aria-hidden="true">
           <span />
           <span />
@@ -28,41 +21,26 @@ export function AppHeader({
           <span />
         </span>
         <span className="logo-text">Logiscore</span>
-        {systemVersion && (
-          <span className="logo-version">v{systemVersion}</span>
-        )}
-      </motion.div>
-      <div className="status-bar-container">
-        <motion.div
-          key={status}
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="status-bar"
-          role="status"
-          aria-live="polite"
-        >
-          <div className="status-indicator" />
-          {status}
-        </motion.div>
       </div>
+      <p
+        className={`status-bar status-${status.tone}`}
+        role="status"
+        aria-live="polite"
+      >
+        {status.text}
+      </p>
       <div className="header-meta">
-        {projectFileCount !== null && (
-          <div className="project-badge">
-            <Icons.Node />
-            <span>{projectFileCount} ファイル</span>
-          </div>
-        )}
-        <div className="filename-badge">
-          <Icons.Check />
-          <span>{filename}</span>
-        </div>
+        <span className="filename-badge">
+          {filename}
+          {projectFileCount !== null && `（${projectFileCount} ファイル）`}
+        </span>
         <a
           className="studio-link"
           href="https://enludus.com"
           target="_blank"
           rel="noopener noreferrer"
         >
-          Enludus ↗
+          Enludus
         </a>
       </div>
     </header>

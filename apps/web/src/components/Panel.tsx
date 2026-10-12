@@ -19,7 +19,7 @@ const Panel: React.FC<PanelProps> = ({
     <section className={`panel ${className}`}>
       <div className="panel-header">
         <span className="panel-title">{title}</span>
-        {verified && <span className="verified-badge">✅ 確認済み</span>}
+        {verified && <span className="verified-badge">確認済み</span>}
         {headerAction}
       </div>
       <div className="panel-content">{children}</div>

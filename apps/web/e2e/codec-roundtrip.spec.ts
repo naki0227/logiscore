@@ -49,7 +49,7 @@ test.describe("Logiscore v2 codec scenarios", () => {
 
     await test.step("Then the original UTF-8 text is restored", async () => {
       await expect(page.getByRole("status")).toHaveText(
-        "✅ テキストを復元しました",
+        "テキストを復元しました",
       );
       await expect(page.getByLabel("復元したデータ")).toHaveValue(
         "E2Eからこんにちは 🎼",
@@ -80,7 +80,7 @@ test.describe("Logiscore v2 codec scenarios", () => {
 
     await test.step("Then the decoder identifies the profile and restores the text", async () => {
       await expect(page.getByRole("status")).toHaveText(
-        "✅ テキストを復元しました",
+        "テキストを復元しました",
       );
       await expect(page.getByLabel("復元したデータ")).toHaveValue(text);
     });
@@ -109,7 +109,7 @@ test.describe("Logiscore v2 codec scenarios", () => {
 
     await test.step("Then the v2 Source File is identified and restored", async () => {
       await expect(page.getByRole("status")).toHaveText(
-        "✅ ソースファイルを復元しました",
+        "ソースファイルを復元しました",
       );
       await expect(page.getByLabel("復元したデータ")).toHaveValue(source);
       await expect(page.locator(".filename-badge")).toContainText(
@@ -135,7 +135,7 @@ test.describe("Logiscore v2 codec scenarios", () => {
     await downloadAndImport(page);
 
     await expect(page.getByRole("status")).toHaveText(
-      "✅ ソースファイルを復元しました",
+      "ソースファイルを復元しました",
     );
     await expect(page.getByLabel("復元したデータ")).toHaveValue(source);
   });
@@ -171,7 +171,7 @@ test.describe("Logiscore v2 codec scenarios", () => {
 
     await test.step("Then the v2 archive restores both source files", async () => {
       await expect(page.getByRole("status")).toHaveText(
-        "✅ プロジェクトを復元しました: 2 ファイル",
+        "プロジェクトを復元しました: 2 ファイル",
       );
       await expect(
         page.locator(".file-item").filter({ hasText: "main.rs" }),
@@ -203,7 +203,7 @@ test.describe("Logiscore v2 codec scenarios", () => {
     await downloadAndImport(page);
 
     await expect(page.getByRole("status")).toHaveText(
-      "✅ プロジェクトを復元しました: 2 ファイル",
+      "プロジェクトを復元しました: 2 ファイル",
       { timeout: 15_000 },
     );
     await expect(page.locator(".file-item")).toHaveCount(2);
@@ -405,9 +405,7 @@ test.describe("Logiscore v2 codec scenarios", () => {
     const download = await downloadAndImport(page, "WAV");
 
     expect(download.suggestedFilename()).toBe("logiscore_output.wav");
-    await expect(page.getByRole("status")).toHaveText(
-      "✅ テキストを復元しました",
-    );
+    await expect(page.getByRole("status")).toHaveText("テキストを復元しました");
     await expect(page.getByLabel("復元したデータ")).toHaveValue(text);
   });
 
@@ -427,7 +425,7 @@ test.describe("Logiscore v2 codec scenarios", () => {
     await downloadAndImport(page, "WAV");
 
     await expect(page.getByRole("status")).toHaveText(
-      "✅ ソースファイルを復元しました",
+      "ソースファイルを復元しました",
     );
     await expect(page.getByLabel("復元したデータ")).toHaveValue(source);
     await expect(page.locator(".filename-badge")).toContainText(
@@ -450,12 +448,12 @@ test.describe("Logiscore v2 codec scenarios", () => {
 
     await page.getByRole("button", { name: "変換する" }).click();
     await expect(page.getByRole("status")).toHaveText(
-      "✅ プロジェクトを空気伝送 WAVに変換し、完全に復元できることを確認しました",
+      "プロジェクトを空気伝送 WAVに変換し、完全に復元できることを確認しました",
     );
     await downloadAndImport(page, "WAV");
 
     await expect(page.getByRole("status")).toHaveText(
-      "✅ プロジェクトを復元しました: 2 ファイル",
+      "プロジェクトを復元しました: 2 ファイル",
       { timeout: 15_000 },
     );
     await expect(page.locator(".file-item")).toHaveCount(2);
@@ -483,9 +481,7 @@ test.describe("Logiscore v2 codec scenarios", () => {
       buffer: await readFile(downloadedPath),
     });
 
-    await expect(page.getByRole("status")).toHaveText(
-      "✅ テキストを復元しました",
-    );
+    await expect(page.getByRole("status")).toHaveText("テキストを復元しました");
     await expect(page.getByLabel("復元したデータ")).toHaveValue(text);
   });
 
@@ -500,7 +496,7 @@ test.describe("Logiscore v2 codec scenarios", () => {
       buffer: Buffer.from("not a wav"),
     });
     await expect(page.getByRole("status")).toHaveText(
-      "⚠️ Logiscoreの録音として認識できませんでした",
+      "Logiscoreの録音として認識できませんでした",
     );
   });
 });

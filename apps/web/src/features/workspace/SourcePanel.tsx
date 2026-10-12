@@ -1,6 +1,4 @@
 import type { ChangeEvent } from "react";
-import { motion } from "framer-motion";
-import { Icons } from "../../components/Icons";
 import Panel from "../../components/Panel";
 import type { ProjectFile } from "../../hooks/useEntropy";
 import type { PayloadSelection } from "../codec/model";
@@ -30,12 +28,7 @@ export function SourcePanel(props: SourcePanelProps) {
   const isProject = props.payload === "project";
   const isText = props.payload === "text";
   return (
-    <motion.div
-      key={`left-${props.uiMode}`}
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: 0.1 }}
-    >
+    <div>
       {props.uiMode === "encode" ? (
         <Panel
           title={
@@ -62,32 +55,26 @@ export function SourcePanel(props: SourcePanelProps) {
           className="input-panel-midi"
           headerAction={<ImportButton onImport={props.onImport} />}
         >
-          <div className="midi-output-container">
-            <div className="midi-card input-version">
-              <div className="midi-card-icon">
-                <Icons.Node />
-              </div>
-              <div className="midi-card-info">
-                <div className="midi-filename">
-                  読み込んだ{props.inputFormat}データ
-                </div>
-                <div className="midi-filesize">
-                  {props.inputSize.toLocaleString()} バイト
-                </div>
-              </div>
-              <div className="input-label">復元しました</div>
-              <button
-                className="btn-icon circle-large"
-                onClick={() => props.onUiModeChange("encode")}
-              >
-                <Icons.Edit />
-              </button>
-              <p className="hint-text">クリックすると編集に戻ります</p>
-            </div>
+          <div className="output-body">
+            <dl className="output-meta">
+              <dt>読み込んだファイル</dt>
+              <dd>{props.inputFormat}</dd>
+              <dt>サイズ</dt>
+              <dd>{props.inputSize.toLocaleString()} バイト</dd>
+            </dl>
+            <p className="hint-text">
+              復元したデータは右側に表示されています。
+            </p>
+            <button
+              className="btn btn-secondary"
+              onClick={() => props.onUiModeChange("encode")}
+            >
+              入力の編集に戻る
+            </button>
           </div>
         </Panel>
       )}
-    </motion.div>
+    </div>
   );
 }
 
@@ -96,15 +83,6 @@ function SourceActions(
 ) {
   return (
     <div className="header-actions">
-      <button
-        className={`btn-icon ${props.isProject ? "active" : ""}`}
-        title="プロジェクトモードの切り替え"
-        onClick={() =>
-          props.onPayloadChange(props.isProject ? "source-file" : "project")
-        }
-      >
-        <Icons.Node />
-      </button>
       {props.isProject ? (
         <>
           <ProjectFolderButton onImport={props.onImport} />
@@ -138,11 +116,8 @@ function ImportButton({
   midiOnly?: boolean;
 }) {
   return (
-    <label
-      className="btn-icon"
-      title={midiOnly ? "MIDIまたは録音を読み込む" : "ファイルを読み込む"}
-    >
-      <Icons.Import />
+    <label className="btn-text">
+      {midiOnly ? "録音・MIDIを開く" : "ファイルを開く"}
       <input
         type="file"
         aria-label={
@@ -166,8 +141,8 @@ function ProjectFolderButton({
   onImport: (event: ChangeEvent<HTMLInputElement>) => void;
 }) {
   return (
-    <label className="btn-icon" title="プロジェクトフォルダを読み込む">
-      <Icons.Node />
+    <label className="btn-text">
+      フォルダを開く
       <input
         type="file"
         aria-label="プロジェクトフォルダを読み込む"
@@ -195,11 +170,10 @@ function ProjectFiles(props: SourcePanelProps) {
         )}
         {props.projectFiles.length > 0 && (
           <button
-            className="btn-icon project-zip"
+            className="btn-text project-zip"
             onClick={props.onDownloadZip}
-            title="ソースをZIPでダウンロード"
           >
-            <Icons.Download /> ZIP
+            ZIPで保存
           </button>
         )}
       </div>

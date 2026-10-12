@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from "framer-motion";
+import type { ReactNode } from "react";
 import { Icons } from "../../components/Icons";
 import Panel from "../../components/Panel";
 
@@ -12,83 +12,74 @@ interface OutputPanelProps {
   verified: boolean;
   projectVerified: boolean;
   isProject: boolean;
+  visualizer: ReactNode;
   onDownload: () => void;
   onSourceChange: (source: string) => void;
 }
 
 export function OutputPanel(props: OutputPanelProps) {
   return (
-    <motion.div
-      key={`right-${props.uiMode}`}
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: 0.3 }}
-    >
+    <div>
       {props.uiMode === "encode" ? (
         <EncodedOutput {...props} />
       ) : (
         <DecodedOutput {...props} />
       )}
-    </motion.div>
+    </div>
   );
 }
 
 function EncodedOutput(props: OutputPanelProps) {
+  const verified = props.isProject ? props.projectVerified : props.verified;
   return (
-    <Panel
-      title={`出力 (${props.encodedFormat})`}
-      className="output-panel"
-      verified={props.verified}
-    >
-      <div className="midi-output-container">
-        <AnimatePresence mode="wait">
-          {props.encodedData ? (
-            <motion.div
-              key="midi-card"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className="midi-card"
+    <Panel title={`出力 (${props.encodedFormat})`} className="output-panel">
+      <div className="output-body">
+        {props.encodedData ? (
+          <>
+            <dl className="output-meta">
+              <dt>ファイル名</dt>
+              <dd className="midi-filename">
+                {props.filename}.{props.encodedFormat.toLowerCase()}
+              </dd>
+              <dt>サイズ</dt>
+              <dd>{props.encodedData.length.toLocaleString()} バイト</dd>
+              <dt>復元の確認</dt>
+              <dd
+                className={
+                  verified ? "verification-status ok" : "verification-status"
+                }
+              >
+                {verified ? "元のデータに戻せることを確認しました" : "未確認"}
+              </dd>
+            </dl>
+            <button
+              className="btn btn-download-main"
+              onClick={props.onDownload}
             >
-              <div className="midi-card-icon">♪</div>
-              <div className="midi-card-info">
-                <div className="midi-filename">
-                  {props.filename}.{props.encodedFormat.toLowerCase()}
-                </div>
-                <div className="midi-filesize">
-                  {props.encodedData.length.toLocaleString()} バイト
-                </div>
+              {props.encodedFormat}をダウンロード
+            </button>
+            {props.decodedSource && (
+              <div className="mini-preview">
+                <p className="preview-header">復元結果の先頭</p>
+                <pre className="preview-content">
+                  {props.decodedSource.slice(0, 100)}
+                  {props.decodedSource.length > 100 && "…"}
+                </pre>
               </div>
-              <button className="btn-download-main" onClick={props.onDownload}>
-                {props.encodedFormat}をダウンロード
-              </button>
-              <div className="verification-status">
-                {(props.isProject ? props.projectVerified : props.verified)
-                  ? "✅ 完全に復元できることを確認済み"
-                  : "未確認"}
-              </div>
-              {props.decodedSource && (
-                <div className="mini-preview">
-                  <div className="preview-header">復元結果のプレビュー</div>
-                  <pre className="preview-content">
-                    {props.decodedSource.slice(0, 100)}...
-                  </pre>
-                </div>
-              )}
-            </motion.div>
-          ) : (
-            <motion.div
-              key="placeholder"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="midi-placeholder"
-            >
-              <div className="placeholder-icon">♪</div>
-              <p>「変換する」を押すと{props.encodedFormat}ファイルができます</p>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            )}
+          </>
+        ) : (
+          <p className="midi-placeholder">
+            「変換する」を押すと、ここに{props.encodedFormat}
+            ファイルが表示されます。
+          </p>
+        )}
       </div>
+      {props.encodedData && props.encodedFormat === "MIDI" && (
+        <div className="output-visualizer" aria-hidden="true">
+          {props.visualizer}
+        </div>
+      )}
     </Panel>
   );
 }

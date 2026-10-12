@@ -65,7 +65,7 @@ test.describe("Logiscore v2 Secure Mode scenarios", () => {
       buffer: wav,
     });
     await expect(page.getByRole("status")).toHaveText(
-      "⚠️ Logiscoreの録音として認識できませんでした",
+      "Logiscoreの録音として認識できませんでした",
     );
     await expect(page.locator("body")).not.toContainText(secret);
     await expect(page.locator("body")).not.toContainText("Argon2");
@@ -78,9 +78,7 @@ test.describe("Logiscore v2 Secure Mode scenarios", () => {
       mimeType: "audio/wav",
       buffer: wav,
     });
-    await expect(page.getByRole("status")).toHaveText(
-      "✅ テキストを復元しました",
-    );
+    await expect(page.getByRole("status")).toHaveText("テキストを復元しました");
     await expect(page.getByLabel("復元したデータ")).toHaveValue(secret);
   });
 
