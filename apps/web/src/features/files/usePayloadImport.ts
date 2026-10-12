@@ -1,3 +1,4 @@
+import type { SetStatus } from "../status/model";
 import type { ChangeEvent, DragEvent } from "react";
 import type { ImportedPayload, ProjectFile } from "../../hooks/useEntropy";
 import type { PayloadSelection } from "../codec/model";
@@ -22,7 +23,7 @@ interface PayloadImportOptions {
   setExtension: (extension: string) => void;
   setFilename: (filename: string) => void;
   setUiMode: (mode: "encode" | "decode") => void;
-  setStatus: (status: string) => void;
+  setStatus: SetStatus;
 }
 
 export function usePayloadImport(options: PayloadImportOptions) {
@@ -37,7 +38,10 @@ export function usePayloadImport(options: PayloadImportOptions) {
     } catch {
       options.setPayload("source-file");
       options.setProjectFiles([]);
-      options.setStatus("⚠️ LogiscoreのMIDIではないか、ファイルが壊れています");
+      options.setStatus(
+        "LogiscoreのMIDIではないか、ファイルが壊れています",
+        "error",
+      );
     }
   };
 
@@ -51,7 +55,7 @@ export function usePayloadImport(options: PayloadImportOptions) {
     );
     if (SUPPORTED_EXTENSIONS.includes(extension))
       options.setExtension(extension);
-    options.setStatus(status);
+    options.setStatus(status, "success");
   };
 
   const applyAudio = async (file: File) => {
@@ -64,7 +68,7 @@ export function usePayloadImport(options: PayloadImportOptions) {
     } catch {
       options.setPayload("source-file");
       options.setProjectFiles([]);
-      options.setStatus("⚠️ Logiscoreの録音として認識できませんでした");
+      options.setStatus("Logiscoreの録音として認識できませんでした", "error");
     }
   };
 
@@ -84,7 +88,7 @@ export function usePayloadImport(options: PayloadImportOptions) {
       void applyProjectFiles(files, options);
       return;
     }
-    void applySource(file, "✅ ファイルを読み込みました");
+    void applySource(file, "ファイルを読み込みました");
   };
 
   const handleDragOver = (event: DragEvent) => {
@@ -113,7 +117,7 @@ export function usePayloadImport(options: PayloadImportOptions) {
     if (!file) return;
     if (isMidi(file)) await applyMidi(file);
     else if (isAudio(file)) await applyAudio(file);
-    else await applySource(file, "✅ ファイルを読み込みました");
+    else await applySource(file, "ファイルを読み込みました");
   };
 
   return { handleImport, handleDragOver, handleDrop };
@@ -128,7 +132,8 @@ function applyDecodedPayload(
     options.setProjectFiles(decoded.files);
     options.setUiMode("encode");
     options.setStatus(
-      `✅ プロジェクトを復元しました: ${decoded.files.length} ファイル`,
+      `プロジェクトを復元しました: ${decoded.files.length} ファイル`,
+      "success",
     );
     return;
   }
@@ -141,8 +146,9 @@ function applyDecodedPayload(
   options.setUiMode("decode");
   options.setStatus(
     decoded.type === "text"
-      ? "✅ テキストを復元しました"
-      : "✅ ソースファイルを復元しました",
+      ? "テキストを復元しました"
+      : "ソースファイルを復元しました",
+    "success",
   );
 }
 
@@ -167,7 +173,7 @@ async function applyProjectFiles(
     )
   ).filter((file): file is ProjectFile => file !== null);
   if (files.length === 0) {
-    options.setStatus("⚠️ 対応しているファイルが見つかりません");
+    options.setStatus("対応しているファイルが見つかりません", "error");
     return;
   }
   const relativeRoot = files[0]?.name.split("/")[0];

@@ -75,7 +75,7 @@ for (const entry of corpus.entries) {
       .getByLabel("ファイルを読み込む")
       .setInputFiles(path.join(corpusRoot, entry.transmissionFile));
     await expect(page.getByRole("status")).toHaveText(
-      "✅ テキストを復元しました",
+      "テキストを復元しました",
       {
         timeout: 15_000,
       },
@@ -127,7 +127,7 @@ for (const entry of corpus.entries.filter(
     );
     if (entry.status === "verified" && entry.measurement) {
       await expect(page.getByRole("status")).toHaveText(
-        "✅ テキストを復元しました",
+        "テキストを復元しました",
       );
       await expect(page.getByLabel("復元したデータ")).toHaveValue(entry.text);
       expect(metrics.finalRecoveryRatePercent).toBe(

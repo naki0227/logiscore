@@ -48,6 +48,26 @@ test.describe("Quick start guide", () => {
   });
 });
 
+test.describe("Output freshness", () => {
+  test("Given an encoded result, when the payload or input changes, then the old output is cleared", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await expect(page.getByRole("status")).toHaveText("準備完了");
+    const download = page.getByRole("button", { name: "MIDIをダウンロード" });
+
+    await page.getByRole("button", { name: "変換する" }).click();
+    await expect(download).toBeVisible();
+    await page.getByLabel("ソースコード").fill("fn main() {}");
+    await expect(download).toHaveCount(0);
+
+    await page.getByRole("button", { name: "変換する" }).click();
+    await expect(download).toBeVisible();
+    await page.getByLabel(/^送るもの/).selectOption("text");
+    await expect(download).toHaveCount(0);
+  });
+});
+
 test.describe("Mobile layout", () => {
   test.use({ viewport: { width: 390, height: 844 } });
 

@@ -12,9 +12,7 @@ test("Opus recording restores the original v2 Text payload through Web Audio", a
   await page.goto("/");
   await expect(page.getByRole("status")).toHaveText("準備完了");
   await page.getByLabel("ファイルを読み込む").setInputFiles(fixturePath);
-  await expect(page.getByRole("status")).toHaveText(
-    "✅ テキストを復元しました",
-  );
+  await expect(page.getByRole("status")).toHaveText("テキストを復元しました");
   await expect(page.getByLabel("復元したデータ")).toHaveValue("Opus");
 
   const metrics = await measureRecordingFixture(page, fixturePath, "Opus");

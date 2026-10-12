@@ -114,8 +114,12 @@ export function useAcousticCodec() {
     }
   }, []);
 
+  /** 設定や入力が変わったときに、古い変換結果を消す */
+  const clear = useCallback(() => setWavData(null), []);
+
   return {
     wavData,
+    clear,
     processing,
     error,
     encodeText,

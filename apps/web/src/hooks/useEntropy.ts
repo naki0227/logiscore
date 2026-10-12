@@ -268,9 +268,15 @@ export function useEntropy() {
     [],
   );
 
+  /** 設定や入力が変わったときに、古い変換結果を消す */
+  const clearEncoded = useCallback(() => {
+    setState((prev) => ({ ...prev, midiData: null, decodedSource: null }));
+  }, []);
+
   return {
     ...state,
     initialize,
+    clearEncoded,
     encodeProjectSource,
     encodeText,
     encodeSourceFile,
