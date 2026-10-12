@@ -1,4 +1,8 @@
-import type { ModeSelection, PayloadSelection } from "./model";
+import {
+  modeDescription,
+  type ModeSelection,
+  type PayloadSelection,
+} from "./model";
 
 interface CodecSelectorProps {
   payload: PayloadSelection;
@@ -38,13 +42,14 @@ export function CodecSelector({
             onModeChange(event.target.value as ModeSelection)
           }
         >
-          <option value="auto">Auto</option>
-          <option value="fast">Fast</option>
-          <option value="music">Music</option>
-          <option value="reliable">Reliable</option>
-          <option value="secure">Secure</option>
+          <option value="auto">Auto · MIDI</option>
+          <option value="fast">Fast · MIDI</option>
+          <option value="music">Music · MIDI</option>
+          <option value="reliable">Reliable · WAV</option>
+          <option value="secure">Secure · WAV</option>
         </select>
       </label>
+      <p className="mode-hint">{modeDescription(mode)}</p>
       <div className="codec-protocol">{protocol}</div>
     </div>
   );

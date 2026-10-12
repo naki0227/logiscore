@@ -77,6 +77,20 @@ export function protocolLabel(
   return `V${v2Version ?? "-"} / ${profile}`;
 }
 
+const MODE_DESCRIPTIONS: Record<ModeSelection, string> = {
+  auto: "Compact MIDI file. Good for downloading and sharing.",
+  fast: "Densest MIDI encoding for the smallest file.",
+  music: "Rhythmic MIDI that sounds more musical. Larger file.",
+  reliable:
+    "Error-corrected WAV that survives speaker → microphone. Use this to send over the air.",
+  secure:
+    "Reliable WAV plus password encryption. Only someone with the password can restore it.",
+};
+
+export function modeDescription(mode: ModeSelection): string {
+  return MODE_DESCRIPTIONS[mode];
+}
+
 interface ComparableProjectFile {
   name: string;
   extension: string;

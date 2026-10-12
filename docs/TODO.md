@@ -1,6 +1,6 @@
 # Logiscore Todo
 
-最終更新: 2026-09-13
+最終更新: 2026-10-12
 
 ## 進行中
 
@@ -23,7 +23,6 @@
 
 ## 未着手
 
-- [未着手] 701KB超のWeb bundleをcode splittingする
 - [未着手] rhythmic acoustic profileのOpus後プリエコーに耐えるtone-boundary検出を設計する
 - [進行中] v2 field validation 2: MacBook→1m→iPhone Voice Memos→M4AのText/File/Project corpus
   - [完了] TextをFixedFallbackで完全復元
@@ -43,9 +42,14 @@
 - [未着手] v2 field validation 5: PCM/Opus/AAC/MP3/resampling codec matrix
 - [未着手] v2 field validation 6: WebRTC後にGoogle Meet通信
 - [未着手] v2 field validation 7: VoiceCallProfileと電話回線
-- [未着手] v2 field validation 8: v2公開デモ3本とREADME更新
+- [進行中] v2 field validation 8: v2公開デモ3本とREADME更新
+  - [完了] READMEをv2の音響データ転送中心に書き直し、楽器表を`midi_gen.rs`と一致させる
+  - [完了] 初回ガイドとText/Reliableの over-the-air demo ボタン
+  - [未着手] Source File / Project のデモ
 
 ## 要確認
+
+- [要確認] Secure Text WAV復元e2eが低速環境でdefault timeout(5s)を超えて失敗する(既存。CIではretryで通過)
 
 - [要確認] GitHub Secrets `VERCEL_TOKEN`、`VERCEL_ORG_ID`、`VERCEL_PROJECT_ID`を登録し、Repository Variable `VERCEL_DEPLOY_ENABLED=true`で本番deployを有効化する
 - [要確認] GitHub ActionsのNode.js 20 runtime廃止warningに対応するaction majorが利用可能になったら更新する
@@ -59,6 +63,11 @@
 - [要確認] Rustの手動debug binaryは自動ビルド対象外。必要ならexamplesまたはintegration testsへ整理する
 
 ## 完了
+
+- [完了] スマホ幅(390px)でControls/ボタンが見切れるレイアウトを修正し、Playwrightで検証
+- [完了] Tone.jsとJSZipを遅延読み込みし、初期JSを707KBから371KBへ削減
+- [完了] MIDI再生完了時の検証callbackがonFileChange引数に渡っていた不具合を修正
+- [完了] Mode選択に平易な説明を追加し、selectをダークテーマに統一
 
 - [完了] Rust/Web CI成功後だけ実行可能なVercel production deploy jobを追加
 - [完了] CI runner Rust 1.98.1で追加されたClippy lint 3件へ適合

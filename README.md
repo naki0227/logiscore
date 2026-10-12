@@ -6,38 +6,73 @@
 
 ## ✨ What is Logiscore?
 
-**Logiscore** is a browser-based web application that converts source code projects into MIDI orchestral symphonies. Drag and drop a folder of source code, and watch — and listen — as each programming language becomes a unique instrument in your personal orchestra.
+**Logiscore sends data with sound.** It turns text, a source file, or a whole project folder into music. You can play it out loud, record it on another device, and import the recording to get the exact original back. Everything happens in your browser.
+
+```
+Write → Encode → Play out loud → Record on another device → Import → Original restored
+```
+
+- **Over the air:** Reliable mode creates an error-corrected WAV designed to survive speaker → microphone. A message played from a MacBook speaker and recorded 1 m away with iPhone Voice Memos (M4A) has been restored without errors ([report](docs/reports/2026-09-12-physical-recording-verification-report.md)).
+- **As a file:** MIDI modes create a compact `.mid` you can share and decode back losslessly.
+- **Private:** Secure mode encrypts the payload with a password (Argon2id + ChaCha20-Poly1305) before turning it into sound.
 
 ### 🔒 Zero-Trust: Your Code Never Leaves Your Machine
 
 All processing happens **100% client-side** using Rust compiled to WebAssembly. No files are uploaded to any server, ever. Safe for proprietary and private codebases.
 
-## 🎻 Language → Instrument Mapping
+## 🚀 Try it in 1 minute
 
-| Extension     | Instrument    | Why                                |
-| ------------- | ------------- | ---------------------------------- |
-| `.ts` / `.js` | Violin        | The lead melody of web development |
-| `.py`         | Flute         | Light and readable                 |
-| `.rs`         | Cello         | Heavy and robust                   |
-| `.go`         | French Horn   | The power of concurrency           |
-| `.css`        | Harp          | Adding beauty                      |
-| `.html`       | Piano         | The foundation of everything       |
-| `Dockerfile`  | Tubular Bells | A blessing for infrastructure      |
+1. Open [logiscore.enludus.com](https://logiscore.enludus.com) and press **Try the over-the-air demo**.
+2. Press **ENCODE**, then **PLAY** near a phone that is recording (or press **DOWNLOAD WAV**).
+3. Import the recording with the import button. The original message comes back.
 
-## 🚀 Tech Stack
+## 🎛️ Modes
 
-| Layer    | Technology                | Role                     |
-| -------- | ------------------------- | ------------------------ |
-| Frontend | React + TypeScript + Vite | UI, file input, playback |
-| Engine   | Rust → wasm-pack → WASM   | Source → MIDI encoding   |
-| Audio    | Web Audio API             | In-browser playback      |
-| Hosting  | Vercel (Edge Network)     | Global delivery + SSL    |
+| Mode     | Output | Best for                                                    |
+| -------- | ------ | ----------------------------------------------------------- |
+| Auto     | MIDI   | Compact file to download and share                          |
+| Fast     | MIDI   | Densest encoding, smallest file                             |
+| Music    | MIDI   | Rhythmic four-voice music that sounds more like a real song |
+| Reliable | WAV    | Sending over the air (speaker → microphone)                 |
+| Secure   | WAV    | Reliable + password encryption                              |
+
+Payloads: **Text**, **Source File**, and **Project** (a whole folder; `.gitignore`, `node_modules`, `.git`, and build artifacts are skipped automatically).
+
+## 🎻 Project mode: Language → Instrument
+
+In Project mode each file becomes its own track, and the instrument depends on the file type:
+
+| Files                                                                  | Instrument        |
+| ---------------------------------------------------------------------- | ----------------- |
+| `.rs` `.cpp` `.c` `.h` `.hpp`                                          | Strings Ensemble  |
+| `.py` `.rb` `.dart` `.swift`                                           | Cello             |
+| `.java` `.kt` `.kts`                                                   | Pizzicato Strings |
+| `.go`                                                                  | French Horn       |
+| `.sh` `.bash` `.zsh`                                                   | Trumpet           |
+| `.ts` `.js` `.tsx` `.jsx`                                              | Clarinet          |
+| `.css` `.scss` `.sass` `.less` `.html` `.svg`                          | Flute             |
+| `.md` `.json` `.yaml` `.yml` `.toml` `.xml` `.txt` `.env`              | Harp              |
+| `.sql`                                                                 | Timpani           |
+| `Dockerfile` `Makefile` `Gemfile` `Cargo.toml` `package.json` `go.mod` | Tubular Bells     |
+| Anything else                                                          | Grand Piano       |
+
+The mapping lives in [`packages/harmonic-core/src/protocol/midi_gen.rs`](packages/harmonic-core/src/protocol/midi_gen.rs).
+
+## 🧱 Tech Stack
+
+| Layer    | Technology                | Role                                     |
+| -------- | ------------------------- | ---------------------------------------- |
+| Frontend | React + TypeScript + Vite | UI, file input, playback                 |
+| Engine   | Rust → wasm-pack → WASM   | Encoding, error correction, decoding     |
+| Audio    | Web Audio API + Tone.js   | In-browser playback and recording import |
+| Hosting  | Vercel (Edge Network)     | Global delivery + SSL                    |
 
 ## ⚡ Key Optimizations
 
 - **Hyper Diet MIDI**: Running Status + 127-delta VLQ constraint for ~40% binary size reduction
+- **Error correction for audio**: CRC-32, Hamming SECDED, bit interleaving, and three-copy majority recovery
 - **Smart Filtering**: Automatic `.gitignore` parsing to exclude `node_modules`, `.git`, and build artifacts
-- **Sub-millisecond**: Handles 2,000+ files with negligible latency
+- **Lazy loading**: The audio synthesizer and ZIP export load only when first used
 
 ## 🛠️ Local Development
 
@@ -83,6 +118,8 @@ The GitHub Actions `Vercel production` job runs only after both Rust and Web job
 - `VERCEL_PROJECT_ID`
 
 Then set the repository Variable `VERCEL_DEPLOY_ENABLED` to `true`. Keep it disabled while Vercel Git Integration is active to avoid duplicate deployments.
+
+Production currently deploys through **Vercel Git Integration** (every push to `main`), so this job stays skipped.
 
 ### v2 benchmark
 

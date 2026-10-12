@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef } from "react";
-import * as Tone from "tone";
+// Tone.js は初回再生時に読み込み、初期バンドルから外す
+import type * as ToneTypes from "tone";
 
 /** 再生設定 */
 export interface PlaybackConfig {
@@ -160,10 +161,11 @@ export function useAudioEngine() {
       onFileChange?: (fileName: string) => void,
       onComplete?: () => void,
     ) => {
+      const Tone = await import("tone");
       await Tone.start();
 
       // オーケストラ用シンセのセットアップ
-      const synths: Record<string, Tone.PolySynth> = {};
+      const synths: Record<string, ToneTypes.PolySynth> = {};
       const delay = new Tone.PingPongDelay("8n", 0.2).toDestination();
       const reverb = new Tone.Reverb(2.5).toDestination();
 
@@ -185,7 +187,7 @@ export function useAudioEngine() {
 
         if (synths[type]) return synths[type];
 
-        let synth: Tone.PolySynth;
+        let synth: ToneTypes.PolySynth;
         if (type === "strings") {
           synth = new Tone.PolySynth(Tone.Synth, {
             oscillator: { type: "sawtooth" },
@@ -307,7 +309,7 @@ export function useAudioEngine() {
       delay.dispose();
       reverb.dispose();
       // シンセの解放
-      Object.values(synths).forEach((s: Tone.PolySynth) => s.dispose());
+      Object.values(synths).forEach((s: ToneTypes.PolySynth) => s.dispose());
       onComplete?.();
     },
     [],
