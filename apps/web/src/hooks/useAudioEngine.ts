@@ -28,7 +28,7 @@ interface NoteEvent {
  * MIDI バイナリからノートイベントを抽出する（簡易パーサー）。
  * WASM 側の midly に依存せず、JS 側で最小限のパースを行う。
  */
-function parseMidiNotes(midiBytes: Uint8Array): {
+export function parseMidiNotes(midiBytes: Uint8Array): {
   notes: NoteEvent[];
   scaleId: number;
   rootKey: number;

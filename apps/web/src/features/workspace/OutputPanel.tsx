@@ -12,7 +12,7 @@ interface OutputPanelProps {
   verified: boolean;
   projectVerified: boolean;
   isProject: boolean;
-  visualizer: ReactNode;
+  score: ReactNode;
   onDownload: () => void;
   onSourceChange: (source: string) => void;
 }
@@ -33,6 +33,7 @@ function EncodedOutput(props: OutputPanelProps) {
   const verified = props.isProject ? props.projectVerified : props.verified;
   return (
     <Panel title={`出力 (${props.encodedFormat})`} className="output-panel">
+      {props.score}
       <div className="output-body">
         {props.encodedData ? (
           <>
@@ -75,11 +76,6 @@ function EncodedOutput(props: OutputPanelProps) {
           </p>
         )}
       </div>
-      {props.encodedData && props.encodedFormat === "MIDI" && (
-        <div className="output-visualizer" aria-hidden="true">
-          {props.visualizer}
-        </div>
-      )}
     </Panel>
   );
 }
@@ -100,6 +96,7 @@ function DecodedOutput(props: OutputPanelProps) {
         </button>
       }
     >
+      {props.score}
       <textarea
         className="code-input"
         aria-label="復元したデータ"

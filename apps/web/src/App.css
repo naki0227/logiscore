@@ -304,7 +304,7 @@ textarea {
   display: flex;
   flex-shrink: 0;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 10px;
   min-height: 48px;
   padding: 8px 16px;
@@ -330,10 +330,15 @@ textarea {
   color: var(--success);
 }
 
+.panel-header > :not(.panel-title):last-child {
+  margin-left: auto;
+}
+
 .header-actions {
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
 }
 
 /* --- Form controls --- */
@@ -374,6 +379,7 @@ input[type="range"] {
 }
 
 .ext-select {
+  max-width: 96px;
   font-family: var(--mono);
   font-size: 12px;
 }
@@ -750,17 +756,124 @@ input[type="range"] {
   color: var(--muted);
 }
 
-.output-visualizer {
+/* --- Score（入力や再生に合わせて動く五線譜） --- */
+
+.score {
   flex-shrink: 0;
-  height: 120px;
-  border-top: 1px solid var(--line);
+  padding: 10px 16px 12px;
+  border-bottom: 1px solid var(--line);
+  background: var(--paper);
 }
 
-.visualizer-container,
-.visualizer-canvas {
+.score-svg {
   display: block;
   width: 100%;
-  height: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.score-line,
+.score-bar {
+  stroke: var(--line-strong);
+  stroke-width: 1;
+}
+
+.score-note ellipse {
+  fill: currentColor;
+}
+
+.score-stem {
+  stroke: currentColor;
+  stroke-width: 1.4;
+}
+
+.score-note {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: note-in 260ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
+}
+
+.tone-low {
+  color: #2d9fd6;
+}
+
+.tone-mid {
+  color: var(--accent);
+}
+
+.tone-high {
+  color: #e8864a;
+}
+
+/* 再生中: まだ鳴っていない音符は薄く、今の音符は少し大きく */
+.score-note.is-waiting {
+  opacity: 0.35;
+}
+
+.score-note.is-active {
+  transform: scale(1.35);
+}
+
+.score-playhead {
+  stroke: var(--ink);
+  stroke-width: 1.5;
+  opacity: 0.6;
+}
+
+/* 復元に成功したら、音符が左から順に一度だけ跳ねる */
+.score-wave .score-note {
+  animation:
+    note-in 260ms cubic-bezier(0.2, 0.7, 0.3, 1) both,
+    note-wave 520ms ease-out calc(var(--i) * 35ms) 1;
+}
+
+.score-caption {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+@keyframes note-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.7);
+  }
+}
+
+@keyframes note-wave {
+  40% {
+    transform: translateY(-7px);
+  }
+}
+
+/* 再生中だけ、ロゴの4本の棒がイコライザーのように動く */
+.logo.is-playing .logo-mark span {
+  transform-origin: bottom;
+  animation: eq 700ms ease-in-out infinite alternate;
+}
+
+.logo.is-playing .logo-mark span:nth-child(2) {
+  animation-delay: -200ms;
+}
+
+.logo.is-playing .logo-mark span:nth-child(3) {
+  animation-delay: -450ms;
+}
+
+.logo.is-playing .logo-mark span:nth-child(4) {
+  animation-delay: -100ms;
+}
+
+@keyframes eq {
+  from {
+    transform: scaleY(0.45);
+  }
+  to {
+    transform: scaleY(1.15);
+  }
 }
 
 /* --- Project files --- */

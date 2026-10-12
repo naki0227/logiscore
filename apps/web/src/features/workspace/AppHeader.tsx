@@ -2,18 +2,20 @@ import type { StatusMessage } from "../status/model";
 
 interface AppHeaderProps {
   status: StatusMessage;
+  playing: boolean;
   filename: string;
   projectFileCount: number | null;
 }
 
 export function AppHeader({
   status,
+  playing,
   filename,
   projectFileCount,
 }: AppHeaderProps) {
   return (
     <header className="header">
-      <div className="logo">
+      <div className={playing ? "logo is-playing" : "logo"}>
         <span className="logo-mark" aria-hidden="true">
           <span />
           <span />

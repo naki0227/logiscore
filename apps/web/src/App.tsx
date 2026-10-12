@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import Visualizer, { type VisualizerHandle } from "./components/Visualizer";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAudioEngine } from "./hooks/useAudioEngine";
 import { useAcousticCodec } from "./hooks/useAcousticCodec";
 import { useEntropy, type ProjectFile } from "./hooks/useEntropy";
@@ -17,6 +16,8 @@ import { ControlsPanel } from "./features/workspace/ControlsPanel";
 import { OutputPanel } from "./features/workspace/OutputPanel";
 import { SourcePanel } from "./features/workspace/SourcePanel";
 import { QuickStartGuide } from "./features/workspace/QuickStartGuide";
+import { ScoreStrip } from "./features/score/ScoreStrip";
+import { midiPitches, previewPitches } from "./features/score/model";
 import { downloadBlob } from "./lib/downloadBlob";
 import { SAMPLE_CODE, SAMPLE_TEXT } from "./features/workspace/sampleCode";
 import type { SetStatus, StatusMessage } from "./features/status/model";
@@ -28,7 +29,6 @@ function App() {
   const audio = useAudioEngine();
   const wavPlayback = useWavPlayback();
   const secure = useSecureMode();
-  const visualizerRef = useRef<VisualizerHandle>(null);
   const [source, setSource] = useState(SAMPLE_CODE);
   const [extension, setExtension] = useState(".rs");
   const [status, setStatusMessage] = useState<StatusMessage>({
@@ -44,7 +44,14 @@ function App() {
   const [mode, setMode] = useState<ModeSelection>("auto");
   const [projectFiles, setProjectFiles] = useState<ProjectFile[]>([]);
   const [projectVerified, setProjectVerified] = useState(false);
-  const [acousticVerified, setAcousticVerified] = useState(false);
+  const [acousticVerified, setAcousticVerifiedState] = useState(false);
+  // 復元に成功したら増やす。譜面の音符が波打つ合図に使う
+  const [celebrateKey, setCelebrateKey] = useState(0);
+  const celebrate = () => setCelebrateKey((key) => key + 1);
+  const setAcousticVerified = (next: boolean) => {
+    setAcousticVerifiedState(next);
+    if (next) celebrate();
+  };
   const [filename, setFilename] = useState("logiscore_output");
   const [delivered, setDelivered] = useState(false);
   const [restored, setRestored] = useState(false);
@@ -69,6 +76,15 @@ function App() {
     ? acousticVerified
     : entropy.decodedSource !== null && entropy.decodedSource === source;
   const encodedSize = encodedData?.length ?? null;
+  const showsEncodedNotes = !isAcoustic && entropy.midiData !== null;
+  const scoreText = isProject ? (projectFiles[0]?.source ?? "") : source;
+  const scorePitches = useMemo(
+    () =>
+      showsEncodedNotes && entropy.midiData
+        ? midiPitches(entropy.midiData)
+        : previewPitches(scoreText),
+    [showsEncodedNotes, entropy.midiData, scoreText],
+  );
   const initialize = entropy.initialize;
 
   useEffect(() => {
@@ -82,6 +98,7 @@ function App() {
     decodeMidi: (bytes) => {
       const decoded = entropy.decodeImportedMidi(bytes);
       setRestored(true);
+      celebrate();
       return decoded;
     },
     decodeAudio: async (file) => {
@@ -92,6 +109,7 @@ function App() {
       setAcousticVerified(decoded.type !== "project");
       if (decoded.type === "project") setProjectVerified(true);
       setRestored(true);
+      if (decoded.type === "project") celebrate();
       return decoded;
     },
     stop: () => {
@@ -143,8 +161,7 @@ function App() {
     await audio.play(
       encodedData,
       { noteDuration: 0.2, tickInterval: 0.25 },
-      (note, velocity, duration, bass) =>
-        visualizerRef.current?.addNote(note, velocity, duration, bass),
+      undefined,
       undefined,
       () => verifyPlayback(encodedData),
     );
@@ -261,6 +278,7 @@ function App() {
     >
       <AppHeader
         status={status}
+        playing={playing}
         filename={filename}
         projectFileCount={isProject ? projectFiles.length : null}
       />
@@ -330,7 +348,19 @@ function App() {
             verified={verified}
             projectVerified={projectVerified}
             isProject={isProject}
-            visualizer={<Visualizer ref={visualizerRef} />}
+            score={
+              <ScoreStrip
+                pitches={scorePitches}
+                caption={
+                  showsEncodedNotes
+                    ? "変換したMIDIの先頭の音"
+                    : "入力に合わせた音のイメージ"
+                }
+                playing={playing}
+                progress={progress}
+                celebrateKey={celebrateKey}
+              />
+            }
             onDownload={handleDownload}
             onSourceChange={setSource}
           />
