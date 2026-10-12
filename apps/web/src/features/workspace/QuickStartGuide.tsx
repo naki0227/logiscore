@@ -80,7 +80,10 @@ export function QuickStartGuide({
   return (
     <section className="quickstart" aria-label="Quick start">
       <div className="quickstart-intro">
-        <h1 className="quickstart-title">Send data with sound</h1>
+        <p className="quickstart-eyebrow">Code / Browser / Sound</p>
+        <h1 className="quickstart-title">
+          Send data <em>with sound.</em>
+        </h1>
         <p className="quickstart-lead">
           Logiscore turns text, source code, or a whole project into music. Play
           it out loud, record it on another device, and import the recording to

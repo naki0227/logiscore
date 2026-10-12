@@ -50,7 +50,7 @@ function EncodedOutput(props: OutputPanelProps) {
               exit={{ opacity: 0, scale: 0.9 }}
               className="midi-card"
             >
-              <div className="midi-card-icon">🎼</div>
+              <div className="midi-card-icon">♪</div>
               <div className="midi-card-info">
                 <div className="midi-filename">
                   {props.filename}.{props.encodedFormat.toLowerCase()}
@@ -83,7 +83,7 @@ function EncodedOutput(props: OutputPanelProps) {
               animate={{ opacity: 1 }}
               className="midi-placeholder"
             >
-              <div className="placeholder-icon">🎵</div>
+              <div className="placeholder-icon">♪</div>
               <p>Press ENCODE to create a {props.encodedFormat} file</p>
             </motion.div>
           )}

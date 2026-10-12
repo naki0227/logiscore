@@ -21,7 +21,13 @@ export function AppHeader({
         animate={{ opacity: 1, x: 0 }}
         className="logo"
       >
-        <span className="logo-text">L O G I S C O R E</span>
+        <span className="logo-mark" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+          <span />
+        </span>
+        <span className="logo-text">Logiscore</span>
         {systemVersion && (
           <span className="logo-version">v{systemVersion}</span>
         )}
@@ -50,6 +56,14 @@ export function AppHeader({
           <Icons.Check />
           <span>{filename}</span>
         </div>
+        <a
+          className="studio-link"
+          href="https://enludus.com"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Enludus ↗
+        </a>
       </div>
     </header>
   );

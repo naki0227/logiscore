@@ -211,7 +211,9 @@ test.describe("Logiscore v2 codec scenarios", () => {
     await page.getByLabel("Payload").selectOption("project");
     await expect(page.locator(".codec-protocol")).toHaveText("V2 / PCM + FEC");
     await expect(
-      page.getByText("Drop a folder here to start Symphony"),
+      page.getByText(
+        "Drop a project folder here, or use the folder button above",
+      ),
     ).toBeVisible();
   });
 

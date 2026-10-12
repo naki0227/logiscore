@@ -40,7 +40,7 @@ export function SourcePanel(props: SourcePanelProps) {
         <Panel
           title={
             isProject
-              ? "PROJECT RADIUS"
+              ? "PROJECT FOLDER"
               : isText
                 ? "TEXT PAYLOAD"
                 : "SOURCE CODE"
@@ -181,28 +181,19 @@ function ProjectFolderButton({
 function ProjectFiles(props: SourcePanelProps) {
   return (
     <div className="project-file-list">
-      <div
-        className="project-header"
-        style={{ display: "flex", alignItems: "center", gap: "8px" }}
-      >
+      <div className="project-header">
         <span className="project-name">{props.filename}</span>
-        <span className="project-count">
-          {props.projectFiles.length} tracks
-        </span>
+        <span className="project-count">{props.projectFiles.length} files</span>
         {props.systemVersion && (
-          <span
-            className="project-version"
-            style={{ fontSize: "10px", opacity: 0.5 }}
-          >
+          <span className="project-version">
             Protocol v{props.systemVersion}
           </span>
         )}
         {props.projectFiles.length > 0 && (
           <button
-            className="btn-icon"
+            className="btn-icon project-zip"
             onClick={props.onDownloadZip}
             title="Download Source ZIP"
-            style={{ marginLeft: "auto" }}
           >
             <Icons.Download /> ZIP
           </button>
@@ -219,7 +210,7 @@ function ProjectFiles(props: SourcePanelProps) {
         ))}
         {props.projectFiles.length === 0 && (
           <div className="project-placeholder">
-            Drop a folder here to start Symphony
+            Drop a project folder here, or use the folder button above
           </div>
         )}
       </div>
