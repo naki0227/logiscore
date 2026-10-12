@@ -36,7 +36,7 @@ export function OutputPanel(props: OutputPanelProps) {
 function EncodedOutput(props: OutputPanelProps) {
   return (
     <Panel
-      title="MIDI MASTER"
+      title={`${props.encodedFormat} OUTPUT`}
       className="output-panel"
       verified={props.verified}
     >
@@ -84,7 +84,7 @@ function EncodedOutput(props: OutputPanelProps) {
               className="midi-placeholder"
             >
               <div className="placeholder-icon">🎵</div>
-              <p>ENCODE YOUR CODE TO MUSIC</p>
+              <p>Press ENCODE to create a {props.encodedFormat} file</p>
             </motion.div>
           )}
         </AnimatePresence>

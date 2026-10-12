@@ -4,3 +4,6 @@ export const SAMPLE_CODE = `fn main() {
     println!("Sum: {}", sum);
 }
 `;
+
+export const SAMPLE_TEXT =
+  "Hello from Logiscore! This message travelled through the air as sound.";

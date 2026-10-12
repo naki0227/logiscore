@@ -22,7 +22,9 @@ export function AppHeader({
         className="logo"
       >
         <span className="logo-text">L O G I S C O R E</span>
-        <span className="logo-version">v{systemVersion || "1.7"}</span>
+        {systemVersion && (
+          <span className="logo-version">v{systemVersion}</span>
+        )}
       </motion.div>
       <div className="status-bar-container">
         <motion.div

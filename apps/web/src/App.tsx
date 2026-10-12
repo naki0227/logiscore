@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import JSZip from "jszip";
 import Visualizer, { type VisualizerHandle } from "./components/Visualizer";
 import { useAudioEngine } from "./hooks/useAudioEngine";
 import { useAcousticCodec } from "./hooks/useAcousticCodec";
@@ -18,8 +17,9 @@ import { AppHeader } from "./features/workspace/AppHeader";
 import { ControlsPanel } from "./features/workspace/ControlsPanel";
 import { OutputPanel } from "./features/workspace/OutputPanel";
 import { SourcePanel } from "./features/workspace/SourcePanel";
+import { QuickStartGuide } from "./features/workspace/QuickStartGuide";
 import { downloadBlob } from "./lib/downloadBlob";
-import { SAMPLE_CODE } from "./features/workspace/sampleCode";
+import { SAMPLE_CODE, SAMPLE_TEXT } from "./features/workspace/sampleCode";
 import "./App.css";
 
 function App() {
@@ -39,6 +39,8 @@ function App() {
   const [projectVerified, setProjectVerified] = useState(false);
   const [acousticVerified, setAcousticVerified] = useState(false);
   const [filename, setFilename] = useState("logiscore_output");
+  const [delivered, setDelivered] = useState(false);
+  const [restored, setRestored] = useState(false);
   const adaptive = useAdaptiveProfile({
     ready: entropy.ready,
     payload,
@@ -70,7 +72,11 @@ function App() {
     ready: entropy.ready,
     payload,
     mode,
-    decodeMidi: entropy.decodeImportedMidi,
+    decodeMidi: (bytes) => {
+      const decoded = entropy.decodeImportedMidi(bytes);
+      setRestored(true);
+      return decoded;
+    },
     decodeAudio: async (file) => {
       const decoded = await acoustic.decodeFile(
         file,
@@ -78,6 +84,7 @@ function App() {
       );
       setAcousticVerified(decoded.type !== "project");
       if (decoded.type === "project") setProjectVerified(true);
+      setRestored(true);
       return decoded;
     },
     stop: () => {
@@ -115,6 +122,7 @@ function App() {
   const handlePlay = async () => {
     if (!encodedData || playing) return;
     setStatus("PLAYING...");
+    setDelivered(true);
     if (isAcoustic) {
       try {
         await wavPlayback.play(encodedData, () =>
@@ -130,6 +138,7 @@ function App() {
       { noteDuration: 0.2, tickInterval: 0.25 },
       (note, velocity, duration, bass) =>
         visualizerRef.current?.addNote(note, velocity, duration, bass),
+      undefined,
       () => verifyPlayback(encodedData),
     );
   };
@@ -161,6 +170,7 @@ function App() {
       }),
       `${filename}.${isAcoustic ? "wav" : "mid"}`,
     );
+    setDelivered(true);
     setStatus(`${encodedFormat} DOWNLOADED`);
   };
 
@@ -168,6 +178,7 @@ function App() {
     if (!isProject || projectFiles.length === 0) return;
     setStatus("CREATING ZIP...");
     try {
+      const { default: JSZip } = await import("jszip");
       const zip = new JSZip();
       projectFiles.forEach((file) => zip.file(file.name, file.source));
       downloadBlob(
@@ -200,6 +211,20 @@ function App() {
     );
   };
 
+  const loadDemo = () => {
+    handleStop();
+    setPayload("text");
+    setMode("reliable");
+    setSource(SAMPLE_TEXT);
+    setFilename("logiscore_demo");
+    setUiMode("encode");
+    setAcousticVerified(false);
+    setProjectVerified(false);
+    setRestored(false);
+    setDelivered(false);
+    setStatus("DEMO LOADED — PRESS ENCODE");
+  };
+
   return (
     <div
       className="app"
@@ -216,6 +241,15 @@ function App() {
         <div className="visualizer-bg">
           <Visualizer ref={visualizerRef} />
         </div>
+        <QuickStartGuide
+          progress={{
+            hasInput: isProject ? projectFiles.length > 0 : source.length > 0,
+            encoded: encodedData !== null,
+            played: delivered,
+            restored,
+          }}
+          onLoadDemo={loadDemo}
+        />
         <div className="layout-grid">
           <SourcePanel
             uiMode={uiMode}
