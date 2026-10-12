@@ -82,7 +82,7 @@ export function QuickStartGuide({
       <div className="quickstart-intro">
         <p className="quickstart-eyebrow">Code / Browser / Sound</p>
         <h1 className="quickstart-title">
-          音で、<em>データを送る。</em>
+          データを<em>音にして</em>送る
         </h1>
         <p className="quickstart-lead">
           テキスト、ソースコード、プロジェクトを音楽に変換します。スピーカーで鳴らして別の端末で録音し、その録音を読み込むと元のデータがそのまま戻ります。処理はすべてブラウザの中で行われ、データはどこにも送信されません。
