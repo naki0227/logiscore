@@ -5,6 +5,11 @@ use harmonic_core::protocol::midi_gen::{encode_project_to_midi, decode_project_f
 use harmonic_core::compressor;
 use harmonic_core::dispatcher;
 
+/// Directory of a local React checkout to round-trip. Set REACT_DIR to override.
+fn react_dir() -> String {
+    std::env::var("REACT_DIR").unwrap_or_else(|_| "../react".to_string())
+}
+
 fn collect_files(dir: &Path, files: &mut Vec<(String, Vec<u8>, Header)>) {
     if !dir.is_dir() { return; }
     if let Ok(entries) = fs::read_dir(dir) {
@@ -22,7 +27,7 @@ fn collect_files(dir: &Path, files: &mut Vec<(String, Vec<u8>, Header)>) {
                     let ext_str = ext.to_string_lossy();
                     if ["js", "ts", "jsx", "tsx", "json", "md", "css", "html", "json", "js"].contains(&ext_str.as_ref()) {
                         if let Ok(content) = fs::read_to_string(&path) {
-                            let rel_path = path.strip_prefix("/Users/hw24a094/react").unwrap().to_string_lossy().to_string();
+                            let rel_path = path.strip_prefix(&react_dir()).unwrap().to_string_lossy().to_string();
                             let compressed = compressor::compress(content.as_bytes()).unwrap();
                             let mut header = dispatcher::header_for_extension(&ext_str).unwrap();
                             
@@ -40,9 +45,10 @@ fn collect_files(dir: &Path, files: &mut Vec<(String, Vec<u8>, Header)>) {
 }
 
 fn main() {
-    println!("Scanning /Users/hw24a094/react...");
+    let root = react_dir();
+    println!("Scanning {}...", root);
     let mut files = Vec::new();
-    collect_files(Path::new("/Users/hw24a094/react"), &mut files);
+    collect_files(Path::new(&root), &mut files);
     
     println!("Found {} files", files.len());
     if files.is_empty() {
