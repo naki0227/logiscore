@@ -1,6 +1,6 @@
 # Logiscore Todo
 
-最終更新: 2026-10-12
+最終更新: 2026-10-21
 
 ## 進行中
 
@@ -20,6 +20,7 @@
     - [完了] 1m Text収録用FixedFallback transmission WAV
     - [完了] MacBook Speaker→1m→iPhone Voice Memosの実M4A収録
     - [完了] 実M4A測定値のcorpus登録とverified化
+- [完了] Node.js 2026年10月セキュリティリリース対応: CIのNode.jsを `.node-version`（22.23.4）に固定（`docs/reports/2026-10-21-nodejs-security-release-report.md`）
 
 ## 未着手
 
